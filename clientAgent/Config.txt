@@ -1,5 +1,0 @@
-debug=false
-remote IP address=10.1.128.87
-NIC=eth0
-socket port=20000
-interval=1000
