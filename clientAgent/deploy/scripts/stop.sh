@@ -8,6 +8,8 @@ IPlist="$DIR/deploy/scripts/iplist.txt"
 IPs=$(cat $IPlist) 
 File="cloudSecurity.jar"
 
+pkill -f 'run.sh'
+
 for i in $IPs  
 do   
 echo "** Stop : "$i

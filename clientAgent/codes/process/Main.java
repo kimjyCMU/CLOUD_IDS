@@ -37,12 +37,6 @@ public class Main {
 
 		// Get the NIC 
 		NIC = Configuration.getNIC();
-        /***
-         * Universal ID of the agent. It composes gatewayIp, pmIp, and vmIp It
-         * On start up, it only knows its own address, not the ip of the gateway
-         * address. current version doesn't use vmIp, just leave it as null.
-         */
-        UID myself = new UID("", pmIP, "");
 
         // Initial contact of the agent. Maybe the relay server or the monitoring server May change subsequently.
         RemoteServer.SetIPPort(Configuration.getRemoteserver(),

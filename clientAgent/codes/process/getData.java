@@ -35,12 +35,6 @@ public class getData {
     public void SendUtil() throws UnknownHostException, IOException {
         GetUtilization getUtil = new GetUtilization();
 
-        this.util_info.diff[0] = true;
-        this.util_info.diff[1] = true;
-        this.util_info.diff[2] = true;
-        this.util_info.diff[3] = true;
-        this.util_info.diff[4] = true;
-
         this.util_info.cpu = getUtil.getCPUUsage();
         this.util_info.mem = getUtil.getMemoryUsage();
         this.util_info.disk = getUtil.getDiskUsage();

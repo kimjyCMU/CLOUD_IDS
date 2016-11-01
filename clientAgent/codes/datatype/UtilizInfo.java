@@ -11,7 +11,6 @@ public class UtilizInfo implements Serializable {
     public double disk;
     public double netin;
     public double netout;
-    public boolean[] diff;
     public String pmIPaddr;
 
     public UtilizInfo(String pmIPaddr) {
@@ -21,9 +20,5 @@ public class UtilizInfo implements Serializable {
         this.disk = 0;
         this.netin = 0;
         this.netout = 0;
-        this.diff = new boolean[5];
-        for (int i = 0; i < 5; i++) {
-            this.diff[i] = false;
-        }
     }
 }
