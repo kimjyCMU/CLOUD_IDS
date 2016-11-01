@@ -1,0 +1,5 @@
+configuration file=/var/lib/tomcat7/webapps/ROOT/cloudSecurity/Config.txt
+DB IP address=127.0.0.1
+DB port=27017
+DB name=cloudSecurity
+Collection name=data
