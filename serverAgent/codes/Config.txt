@@ -1,0 +1,6 @@
+isPublicIP=false
+socket port=20000
+DB IP address=127.0.0.1
+DB port=27017
+DB name=cloudSecurity
+collection=data
