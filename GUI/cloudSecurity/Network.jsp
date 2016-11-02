@@ -94,7 +94,7 @@ data.forEach(function(d){
 });	
 console.log(data);
 
-var utilType = ["Inbound", "Outbound"];
+var metrics = ["Inbound", "Outbound"];
 
 var dataGroup = d3.nest()
       .key(function(d) {return d.Type;})
@@ -105,7 +105,7 @@ console.log(JSON.stringify(dataGroup));
 var currentTime = new Date();
 
 var	xScale = d3.time.scale().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), currentTime]);
-var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 100]);
+var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 1000]);
 
 /*
 var xScale = d3.time.scale().range([0, WIDTH]);
@@ -149,7 +149,7 @@ var svg = d3.select("body").append("svg")
 	.attr("transform", "rotate(-90)")
 	.attr("y", MARGINS.left-50)
 	.attr("x", -HEIGHT/2)
-	.text('Utilization (%)');
+	.text('Network traffic (bps)');
 		
 	svg.append("clipPath")
 		.attr("id", "clip")
@@ -158,7 +158,7 @@ var svg = d3.select("body").append("svg")
 		.attr("width", WIDTH - MARGINS.right)
 		.attr("height",HEIGHT - MARGINS.top);
 
-utilType.forEach(function(d,i) {		   
+metrics.forEach(function(d,i) {		   
    svg.append('rect')
    		.attr("x", WIDTH - (MARGINS.right/2))
 		.attr("y", MARGINS.top + (i * 20))

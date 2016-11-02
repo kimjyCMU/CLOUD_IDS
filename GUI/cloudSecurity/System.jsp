@@ -94,7 +94,7 @@ data.forEach(function(d){
 });	
 console.log(data);
 
-var utilType = ["CPU", "RAM", "Disk"];
+var metrics = ["CPU", "RAM", "Disk"];
 
 var dataGroup = d3.nest()
       .key(function(d) {return d.Type;})
@@ -158,7 +158,7 @@ var svg = d3.select("body").append("svg")
 		.attr("width", WIDTH - MARGINS.right)
 		.attr("height",HEIGHT - MARGINS.top);
 
-utilType.forEach(function(d,i) {		   
+metrics.forEach(function(d,i) {		   
    svg.append('rect')
    		.attr("x", WIDTH - (MARGINS.right/2))
 		.attr("y", MARGINS.top + (i * 20))
