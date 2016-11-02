@@ -17,7 +17,8 @@ public class Configuration {
 	{
 		try
 		{
-			File readFile = new File("./Config.txt");
+			String dir = "/var/lib/tomcat7/webapps/ROOT/cloudSecurity/Config.txt";
+			File readFile = new File(dir);
 			BufferedReader inFile = new BufferedReader(new FileReader(readFile));
 			String sLine = null;
 			

@@ -32,8 +32,13 @@ public class ActionServlet extends HttpServlet {
   response.setHeader("Cache-Control","no-Cache"); 
   
    // Response utilization history of a clicked machine 
-  if(!request.getParameter("data").toString().equals("")){
-	name = data.getResult(request.getParameter("data").toString()); 
+  if(!request.getParameter("system").toString().equals("")){
+	name = data.getResult(request.getParameter("system").toString(), "system"); 
+	response.getWriter().write(name); 
+  }
+  
+  else if(!request.getParameter("network").toString().equals("")){
+	name = data.getResult(request.getParameter("network").toString(), "network"); 
 	response.getWriter().write(name); 
   }
  }

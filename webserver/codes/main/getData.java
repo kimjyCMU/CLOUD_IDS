@@ -11,7 +11,7 @@ public class getData
 	static DBCollection collection;			
 	
 	static	ArrayList<String> timeType = new ArrayList<String>();
-	static	ArrayList<String> utilType = new ArrayList<String>();
+	static	ArrayList<String> metrics = new ArrayList<String>();
 	
 	static String data = "";
 	
@@ -20,14 +20,8 @@ public class getData
 		try 
 		{
 			collection = db.getCollection(collName);
-			
+
 			timeType.add("min");
-			
-			utilType.add("CPU");
-			utilType.add("RAM");
-			utilType.add("Disk");
-			utilType.add("Inbound");
-			utilType.add("Outbound");
 		} 
 		catch(MongoException e) {
 			System.out.println(e.getMessage());
@@ -37,10 +31,27 @@ public class getData
 	
 	public getData() {}
 	
-	public static String getResult(String clickedIP)
-	{		
-		Cursor cursor = getCursor(clickedIP);
+	public static String getResult(String clickedIP, String dataType)
+	{
+		//##### Set metrics to show####//
+		metrics.clear();
 		
+		if(dataType.equals("system"))
+		{
+			metrics.add("CPU");
+			metrics.add("RAM");
+			metrics.add("Disk");
+		}
+		
+		else if(dataType.equals("network"))
+		{
+			metrics.add("Inbound");
+			metrics.add("Outbound");
+		}
+		//#############################//
+		
+		Cursor cursor = getCursor(clickedIP);
+				
 		while(cursor.hasNext())
 		{
 			HashSet<dataFormat> tsData = new HashSet<dataFormat>();
@@ -59,9 +70,9 @@ public class getData
 				
 				for(int j=0; object.size() > j; j++)
 				{					
-					for(int k=0; utilType.size() > k; k++)
+					for(int k=0; metrics.size() > k; k++)
 					{
-						String type = utilType.get(k);
+						String type = metrics.get(k);
 						String value = (String)object.get(j).get(type);
 						
 						if(value != null)
@@ -86,18 +97,18 @@ public class getData
 
 				ArrayList<String> lastUtil = getLastData(clickedIP);				
 				
-				for(int k=0; utilType.size() >k; k++)
+				for(int k=0; metrics.size() >k; k++)
 				{		
 					String value = "0.0";
 					
 					if(lastUtil.get(k) != null && !lastUtil.get(k).equals("null"))
 							value = lastUtil.get(k);
 							
-					data += "{\"Type\" : \"" + utilType.get(k) + "\",";
+					data += "{\"Type\" : \"" + metrics.get(k) + "\",";
 					data += "\"TS\" : \"" + (int)((System.currentTimeMillis()/1000)) + "\",";
 					data += "\"Value\" : \"" + lastUtil.get(k) + "\"}";
 					
-					if(utilType.size() != k+1)
+					if(metrics.size() != k+1)
 						data += ",";								
 				}
 			}
@@ -106,9 +117,9 @@ public class getData
 			{		
 				ArrayList<String> lastUtil = getLastData(clickedIP);
 				
-				for(int k=0; utilType.size() >k; k++)
+				for(int k=0; metrics.size() >k; k++)
 				{
-					dataForm = new dataFormat((int)(System.currentTimeMillis()/1000), lastUtil.get(k), utilType.get(k));
+					dataForm = new dataFormat((int)(System.currentTimeMillis()/1000), lastUtil.get(k), metrics.get(k));
 					tsData.add(dataForm);
 				}			
 									
@@ -187,9 +198,9 @@ public class getData
 		BasicDBObject query = new BasicDBObject();
 		query.put("IP","$IP");
 		
-		for(int i=0; utilType.size() > i; i++)
+		for(int i=0; metrics.size() > i; i++)
 		{
-			String type = utilType.get(i);
+			String type = metrics.get(i);
 			query.put(type,"$L"+type);
 		}
 		
@@ -214,9 +225,9 @@ public class getData
 
 			BasicDBObject result = (BasicDBObject) cursor.next();	
 			
-			for(int i=0; utilType.size() > i; i++)
+			for(int i=0; metrics.size() > i; i++)
 			{
-				String type = utilType.get(i);
+				String type = metrics.get(i);
 				String value = (String)result.get(type);	
 				lastUtilValues.add(value);			
 			}
@@ -251,7 +262,7 @@ public class getData
 			.build();
 		
 		Cursor cursor = collection.aggregate(pipeline,aggregationOptions);	
-		
+			
 		return cursor;
 	}
 	
