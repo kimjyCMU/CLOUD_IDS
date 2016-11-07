@@ -31,6 +31,7 @@ public class Main {
         
 		// Loading configuration options
         Configuration.setConfiguration();
+		Configuration.printAll();
 		
         // Get the IP address of the physical server hosting this agent
         pmIP = getIp();
@@ -54,9 +55,9 @@ public class Main {
             System.err.println("Cannot get the IP of this server.");
         }
         
-        getData data = new getData(pmIP); // This engine is not for any specific vm, it's
-                                // used for utilization and
-                                // handshake with server
+        getSystem system = new getSystem(); 
+		getNetwork network = new getNetwork();
+		getRequest request = new getRequest();
     }
 
     public static String getIp() throws UnknownHostException {
@@ -131,4 +132,10 @@ public class Main {
 
         return matcher.find();
     }
+	
+	public static String getSystemIP()
+	{
+		return pmIP;		
+	}
+	
 }

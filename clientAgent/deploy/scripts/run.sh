@@ -1,6 +1,7 @@
 #!/bin/bash  
 
 user="lama"
+password="llama"
 
 ###### Run the program #####
 DIR="/home/$user/cloudSecurity/clientAgent"
@@ -8,11 +9,12 @@ IPlist="$DIR/deploy/scripts/iplist.txt"
 IPs=$(cat $IPlist) 
 
 RemoteDIR="/home/$user/cloudSecurity"
-File="cloudSecurity.jar"
+File="runAgent.sh"
 
 for i in $IPs  
 do   
 echo "** Run : "$i
 
-ssh $user@$i "cd $RemoteDIR;java -Djava.library.path=./lib -jar '$File' " &
-done  
+ssh -t -t $user@$i "$RemoteDIR/$File" &  
+
+done

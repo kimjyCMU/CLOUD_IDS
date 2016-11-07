@@ -5,7 +5,7 @@ user="lama"
 ###### Update with the latest files first
 DIR="/home/$user/cloudSecurity/clientAgent"
 cd $DIR/codes; 
-cp -r cloudSecurity.jar Config.txt lib/ $DIR/deploy/files/
+cp -r cloudSecurity.jar Config.txt runAgent.sh stopAgent.sh lib/ $DIR/deploy/files/
 
 ###### Send the files to VMs
 IPlist="$DIR/deploy/scripts/iplist.txt"

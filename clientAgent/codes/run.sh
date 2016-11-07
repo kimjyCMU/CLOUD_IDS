@@ -2,7 +2,7 @@
 
 user="lama"
 DIR="/home/$user/cloudSecurity/clientAgent/codes"
-
+FILE="cloudSecurity.jar"
 ###### run the program #####
 
-java -Djava.library.path=./lib -jar cloudSecurity.jar  
+cd $DIR; sudo java -Djava.library.path=./lib -jar $FILE 

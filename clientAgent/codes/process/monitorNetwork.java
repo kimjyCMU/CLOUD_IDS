@@ -9,12 +9,8 @@ import java.text.DecimalFormat;
 import configuration.Configuration;
 
 @SuppressWarnings("restriction")
-public class GetUtilization extends Thread {
+public class monitorNetwork extends Thread {
     Thread t;
-
-    static final int kiloByte = 1024;
-    static final int megaByte = 1024 * 1024;
-    static final int gigaByte = 1024 * 1024 * 1024;
 
     static double rx = 0;
     static double tx = 0;
@@ -23,37 +19,38 @@ public class GetUtilization extends Thread {
 
     OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
             .getOperatingSystemMXBean();
+	
+	 @SuppressWarnings("deprecation")
+    public void getNetwork() 
+	{
+        Sigar sigar = new Sigar();
+		
+        try {
+            NetInterfaceStat ifstat = sigar.getNetInterfaceStat(Configuration.getNIC());
+			
+            long rxBytes = ifstat.getRxBytes();
+            long txBytes = ifstat.getTxBytes();
+			System.out.println("");
+			
+            t = new TxRxThread();
+            t.start();
+            Thread.sleep(1000);
 
-    public double getCPUUsage() {
-        double cpu = 0.0;
+			long rxNextBytes = TxRxThread.getNextRx();
+            long txNextBytes = TxRxThread.getNextTx();
 
-        cpu = bean.getSystemCpuLoad() * 100;
-        cpu = decimalFormat(cpu);
+            rx = rxNextBytes - rxBytes;
+            tx = txNextBytes - txBytes;
 
-        return cpu;
-    }
-
-    public double getMemoryUsage() {
-        double totalRAM = bean.getTotalPhysicalMemorySize() / megaByte;
-        double freeRAM = bean.getFreePhysicalMemorySize() / megaByte;
-
-        double ram = (totalRAM - freeRAM) / totalRAM * 100;
-        ram = decimalFormat(ram);
-
-        return ram;
-    }
-
-    public double getDiskUsage() {
-        File f = new File("/");
-
-        double totalDisk = f.getTotalSpace() / gigaByte;
-        double freeDisk = f.getFreeSpace() / gigaByte;
-
-        double disk = (totalDisk - freeDisk) / totalDisk * 100;
-        disk = decimalFormat(disk);
-
-        return disk;
-    }
+            t.stop();
+        } catch (SigarException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            sigar.close();
+        }
+	}
 
     public double decimalFormat(double usage) {
         DecimalFormat format = new DecimalFormat();
@@ -70,36 +67,6 @@ public class GetUtilization extends Thread {
     public double getOutboundTraffic() {
         return decimalFormat(tx);
     }
-
-    @SuppressWarnings("deprecation")
-    public void getNetworkUtil() {
-        Sigar sigar = new Sigar();
-        try {
-            NetInterfaceStat ifstat = sigar.getNetInterfaceStat(Configuration.getNIC());
-			
-            long rxBytes = ifstat.getRxBytes();
-            long txBytes = ifstat.getTxBytes();
-			System.out.println("");
-			
-            t = new TxRxThread();
-            t.start();
-            Thread.sleep(Configuration.getInterval());
-
-			long rxNextBytes = TxRxThread.getNextRx();
-            long txNextBytes = TxRxThread.getNextTx();
-
-            rx = rxNextBytes - rxBytes;
-            tx = txNextBytes - txBytes;
-
-            t.stop();
-        } catch (SigarException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            sigar.close();
-        }
-    }
 }
 
 class TxRxThread extends Thread {
@@ -108,7 +75,7 @@ class TxRxThread extends Thread {
 
     public void run() {
         try {
-            Thread.sleep(Configuration.getInterval()-150);
+            Thread.sleep(1000-150);
             Sigar sigar = new Sigar();
             try {
                 NetInterfaceStat ifstat = sigar.getNetInterfaceStat(Configuration.getNIC());

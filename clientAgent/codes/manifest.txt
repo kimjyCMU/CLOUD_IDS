@@ -1,2 +1,2 @@
 Main-Class: process/Main
-Class-Path: lib/sigar-1.6.4.jar
+Class-Path: lib/sigar-1.6.4.jar lib/jnetpcap.jar
