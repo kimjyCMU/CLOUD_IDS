@@ -32,7 +32,7 @@ class SendRequest extends Thread {
 		capturePackets packet = new capturePackets(ip);		
 		
 		
-/*		while(true)
+		while(true)
 		{
 			packet.capture();
 			
@@ -45,7 +45,7 @@ class SendRequest extends Thread {
 				e.printStackTrace();
 			}
 		}
- */   }
+   }
 	
 	public void Sendtoserver(int infoType) 
 	{

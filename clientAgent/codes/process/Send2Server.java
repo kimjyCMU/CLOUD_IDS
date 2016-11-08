@@ -22,6 +22,7 @@ public class Send2Server {
     public Send2Server(DatagramSocket s) {
         socket = s;
     }
+	
     public void init(){
         start = false; 
     }
@@ -59,5 +60,4 @@ public class Send2Server {
             e.printStackTrace();
         }
     }
-
 }

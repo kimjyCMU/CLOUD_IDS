@@ -5,15 +5,18 @@ import configuration.*;
 import java.util.ArrayList;  
 import java.util.Date;  
 import java.util.List;  
+import java.math.BigInteger;
   
 import org.jnetpcap.Pcap;  
 import org.jnetpcap.PcapIf;  
 import org.jnetpcap.packet.PcapPacket;  
-import org.jnetpcap.packet.PcapPacketHandler; 
+import org.jnetpcap.packet.PcapPacketHandler;
+import org.jnetpcap.packet.Payload; 
+import org.jnetpcap.packet.format.*;
 import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
+import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.network.Ip4;
-import org.jnetpcap.packet.JFlowMap;
 
 
 public class capturePackets {  
@@ -21,9 +24,12 @@ public class capturePackets {
 	static PcapIf nic = null;
 	static StringBuilder errbuf;
 	
+	static int servicePort;
+	
 	public capturePackets(String ip)
 	{
 		this.ip = ip;
+		servicePort = Configuration.getServicePort();
 		
 		List<PcapIf> alldevs = new ArrayList<PcapIf>(); // Will be filled with NICs  
         errbuf = new StringBuilder(); // For any error msgs  
@@ -37,7 +43,8 @@ public class capturePackets {
   
         System.out.println("\n==== Network devices found ====");  
         int i = 0;  
-        for (PcapIf device : alldevs) {  
+        for (PcapIf device : alldevs) 
+		{  
             String description =  
                 (device.getDescription() != null) ? device.getDescription()  
                     : "No description available";  
@@ -53,22 +60,27 @@ public class capturePackets {
         }  
 	}
   
-    public static void capture() {  
-
+    public static void capture() 
+	{  
         int snaplen = 64 * 1024;           // Capture all packets, no trucation  
         int flags = Pcap.MODE_PROMISCUOUS; // capture all packets  
         int timeout = 10 * 1000;           // 10 seconds in millis  
-        Pcap pcap =  
-            Pcap.openLive(nic.getName(), snaplen, flags, timeout, errbuf);  
+        Pcap pcap = Pcap.openLive(nic.getName(), snaplen, flags, timeout, errbuf);  
   
-        if (pcap == null) {  
+        if (pcap == null) 
+		{  
             System.err.printf("Error while opening device for capture: "  
                 + errbuf.toString());  
             return;  
-        }  
+        }
 
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() 
 		{  
+            Tcp tcp = new Tcp();
+            Udp udp = new Udp();
+            Ip4 ip = new Ip4(); 
+			Http http = new Http();
+
             byte[] sIP = new byte[4];
             byte[] dIP = new byte[4];
 			
@@ -77,47 +89,74 @@ public class capturePackets {
 			int srcPort;
             int dstnPort;
 			
-            Tcp tcp = new Tcp();
-            Udp udp = new Udp();
-            Ip4 ip = new Ip4(); 
+			Payload payload = new Payload();
+			boolean data = false;
+			
+			byte[] payloadContent;
+			String content = "## No payload";
+			
+			StringBuilder str = new StringBuilder();
 			
             public void nextPacket(PcapPacket packet, String user) 
-			{ 
-				if (packet.hasHeader(ip) && packet.hasHeader(tcp)) 
+			{
+				if (packet.hasHeader(ip))
+				{
+					sIP = packet.getHeader(ip).source();
+					srcIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
+					dIP = packet.getHeader(ip).destination();
+					dstnIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
+				}
+				
+				if (packet.hasHeader(tcp)) 
 				{
 					srcPort = tcp.source();
 					dstnPort = tcp.destination();
-					sIP = packet.getHeader(ip).source();
-					srcIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
-					dIP = packet.getHeader(ip).destination();
-					dstnIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-						
-					System.out.println(srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort);
-				} 
 					
-				else if (packet.hasHeader(ip) && packet.hasHeader(udp)) 
+					// Should be analyzed
+					if((servicePort == srcPort) || (servicePort == dstnPort))
+					{
+						// HTTP packet
+						if(servicePort == 80)
+						{
+							if(packet.hasHeader(http) && packet.hasHeader(payload))
+							{			
+								payloadContent = http.getPayload();
+								content = "## HTTP : " + new String(payloadContent);
+								
+								//#################
+//								count (srcPort, dstnPort);
+							}
+						}
+						
+						else
+						{
+//							count (srcPort, dstnPort);
+						}
+						
+						System.out.println(srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort + " ");
+						System.out.println(content);
+					}					
+				}				
+            }
+			
+			
+/*			public void countRQRS(String srcPort, String dstnPort)
+			{
+				// request
+				if(dstnPort == servicePort)
 				{
-					srcPort = udp.source();
-					dstnPort = udp.destination();
-					sIP = packet.getHeader(ip).source();
-					srcIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
-					dIP = packet.getHeader(ip).destination();
-					dstnIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-
-					System.out.println(srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort);
+					count srcIP --> by ip
 				}
-
-  
-                System.out.printf("Received packet at %s caplen=%-4d len=%-4d %s\n",  
-                    new Date(packet.getCaptureHeader().timestampInMillis()),   
-                    packet.getCaptureHeader().caplen(),  // Length actually captured  
-                    packet.getCaptureHeader().wirelen(), // Original length   
-                    user                                 // User supplied object  
-                );  
-            }  
-		};
+				
+				// response
+				if(srcPort == servicePort)
+				{
+					count dstnIP --> by ip
+				}
+			}
+*/		};
 		
-		pcap.loop(10, jpacketHandler, "jNetPcap rocks!");
+		pcap.loop(5, jpacketHandler, "jNetPcap rocks!");
 		
         pcap.close();  
     }  

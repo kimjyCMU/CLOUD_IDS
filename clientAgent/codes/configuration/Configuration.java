@@ -10,7 +10,7 @@ public class Configuration {
     private static int socketPort;
 	
 	private static String NIC = null;
-	private static int servicePort; // For tshark
+	private static int servicePort;
 	
 	private static int systemInterval;
 	private static int networkInterval;
