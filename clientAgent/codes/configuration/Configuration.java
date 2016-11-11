@@ -16,9 +16,6 @@ public class Configuration {
 	private static int networkInterval;
 	private static int requestInterval;
 	
-	private static String reqFile;
-	private static String resFile;
-	
 	private static int avgCPU;
 	private static int avgRAM;
 	private static int avgDISK;
@@ -84,13 +81,6 @@ public class Configuration {
 
 				else if (parameter.equals("request_interval"))
                     requestInterval = Integer.parseInt(value);
-	
-				//###### Set command options for tshark ######
-		        else if (parameter.equals("request_file"))
-                    reqFile = value;		
-				
-				else if (parameter.equals("response_file"))
-                    resFile = value;
 				
 				//###### Set an average value for each metric  ######
 				else if (parameter.equals("CPU_avg"))
@@ -175,15 +165,6 @@ public class Configuration {
 	public static int getRequestInterval() {
         return requestInterval;
     }
-
-	//################################
-	public static String getReqFile() {
-        return reqFile;
-    }
-	
-	public static String getResFile() {
-        return resFile;
-    }
 	
 	//##################################
 	public static int getAvgCPU() {
@@ -253,8 +234,6 @@ public class Configuration {
 		System.out.println(getSystemInterval());
 		System.out.println(getNetworkInterval());
 		System.out.println(getRequestInterval());
-		System.out.println(getReqFile());
-		System.out.println(getResFile());
 		System.out.println(getAvgCPU());
 		System.out.println(getAvgRAM());
 		System.out.println(getAvgDISK());	

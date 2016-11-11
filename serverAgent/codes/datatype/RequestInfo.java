@@ -11,7 +11,6 @@ public class RequestInfo implements Serializable {
     public int req;
 	public int res;
 	public double ratio;
-	private ArrayList<neighborInfo> neighbor = new ArrayList<neighborInfo>();
 	
     public RequestInfo(String myIP, String neighIP, int port, int req, int res, double ratio) 
 	{

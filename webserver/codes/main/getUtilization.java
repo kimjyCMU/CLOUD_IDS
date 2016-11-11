@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import com.mongodb.*;
 import java.net.UnknownHostException;
 
-public class getData
+public class getUtilization
 {
 	static DBCollection collection;			
 	
@@ -15,12 +15,13 @@ public class getData
 	
 	static String data = "";
 	
-	public getData(DB db, String collName) throws MongoException 
+	public getUtilization(DB db, String collName) throws MongoException 
 	{
 		try 
 		{
 			collection = db.getCollection(collName);
 
+			timeType.clear();
 			timeType.add("min");
 		} 
 		catch(MongoException e) {
@@ -29,7 +30,7 @@ public class getData
 		}	
 	}
 	
-	public getData() {}
+	public getUtilization() {}
 	
 	public static String getResult(String clickedIP, String dataType)
 	{
@@ -48,6 +49,7 @@ public class getData
 			metrics.add("Inbound");
 			metrics.add("Outbound");
 		}
+
 		//#############################//
 		
 		Cursor cursor = getCursor(clickedIP);
@@ -58,7 +60,6 @@ public class getData
 			
 			BasicDBObject result = (BasicDBObject) cursor.next();	
 			
-			String ip = "";
 			dataFormat dataForm;
 			
 			for(int i=0; timeType.size() > i; i++)
@@ -82,7 +83,7 @@ public class getData
 							if(ts > (int)(System.currentTimeMillis()/1000))
 								continue;
 							
-							dataForm = new dataFormat(ts, value, type);		
+							dataForm = new dataFormat(ts, clickedIP, value, type);		
 							tsData.add(dataForm);
 							break;
 						}
@@ -119,7 +120,7 @@ public class getData
 				
 				for(int k=0; metrics.size() >k; k++)
 				{
-					dataForm = new dataFormat((int)(System.currentTimeMillis()/1000), lastUtil.get(k), metrics.get(k));
+					dataForm = new dataFormat((int)(System.currentTimeMillis()/1000), clickedIP, lastUtil.get(k), metrics.get(k));
 					tsData.add(dataForm);
 				}			
 									
@@ -275,34 +276,5 @@ public class getData
        cal.setTimeInMillis(milliseconds);
 	   
 	   return sdf.format(cal.getTime());
-	}
-}
-
-class dataFormat
-{
-	int TS;
-	String value;
-	String type;
-	
-	public dataFormat(int TS, String value, String type)
-	{
-		this.TS = TS;
-		this.value = value;
-		this.type = type;
-	}
-	
-	public int getTS()
-	{
-		return TS;
-	}
-	
-	public String getValue()
-	{
-		return value;
-	}
-	
-	public String getType()
-	{
-		return type;
 	}
 }

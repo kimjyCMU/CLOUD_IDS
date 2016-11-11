@@ -33,10 +33,7 @@ public class Monitor {
 			setCollection collection = new setCollection(dbIP, dbPort, dbName, collName);
 		
 			// start receiving data from clients
-			server.start();
-			
-			// start updating the collection
-			collection.initialize();			
+			server.start();		
 			
 		} catch (SocketException e) {
 			e.printStackTrace();

@@ -76,32 +76,39 @@ public class Socketserver extends Thread{
 				try 
 				{
 					RequestType request = (RequestType) in_objectStream.readObject();
-					String pmIP = "";
+					String ip = "";
 					
 					System.out.println("\n\n=====================\nReceived a packet from : " + client.getHostAddress());
-										
+															
+					// receive system utilization
+					if(request.getType()==Configuration.SYSTEM)
+					{
+						SystemInfo sysInfo = request.getSystemInfo();
+						ip = sysInfo.ip;
+
+						dataCollection.updateUtilization(ip, "CPU", Double.toString(sysInfo.cpu));	
+						dataCollection.updateUtilization(ip, "RAM", Double.toString(sysInfo.mem));
+						dataCollection.updateUtilization(ip, "Disk", Double.toString(sysInfo.disk));					
+					}
 					
-					// receive utilization data from clients
-					if(request.getType()==Configuration.UTILIZATION)
+					// receive network utilization
+					if(request.getType()==Configuration.NETWORK)
 					{
 						//this is a utilization info message from an agent
-						UtilizInfo uInfo = request.getUtil();
-						pmIP = uInfo.pmIPaddr;
-
-						if(Double.toString(uInfo.cpu) != null && !Double.toString(uInfo.cpu).equals("null"))
-							dataCollection.updateCollection(pmIP, "CPU", Double.toString(uInfo.cpu));	
-							
-						if(Double.toString(uInfo.mem) != null && !Double.toString(uInfo.mem).equals("null"))
-							dataCollection.updateCollection(pmIP, "RAM", Double.toString(uInfo.mem));
-							
-						if(Double.toString(uInfo.disk) != null && !Double.toString(uInfo.disk).equals("null"))
-							dataCollection.updateCollection(pmIP, "Disk", Double.toString(uInfo.disk));
-
-						if(Double.toString(uInfo.netin) != null && !Double.toString(uInfo.netin).equals("null"))	
-							dataCollection.updateCollection(pmIP, "Inbound", Double.toString(uInfo.netin));	
-							
-						if(Double.toString(uInfo.netout) != null && !Double.toString(uInfo.netout).equals("null"))	
-							dataCollection.updateCollection(pmIP, "Outbound", Double.toString(uInfo.netout));												
+						NetworkInfo netInfo = request.getNetworkInfo();
+						ip = netInfo.ip;
+						
+						dataCollection.updateUtilization(ip, "Inbound", Double.toString(netInfo.netin));	
+						dataCollection.updateUtilization(ip, "Outbound", Double.toString(netInfo.netout));												
+					}
+					
+					// receive request/response data
+					if(request.getType()==Configuration.REQUEST)
+					{
+						//this is a utilization info message from an agent
+						RequestInfo requestInfo = request.getRequestInfo();
+													
+						dataCollection.updateRequest("RQ", requestInfo);												
 					}
 				} 
 				catch (ClassNotFoundException e) 

@@ -1,11 +1,10 @@
 package process;
 
 import configuration.*; 
+import datatype.*; 
 
-import java.util.ArrayList;  
-import java.util.Date;  
-import java.util.List;  
-import java.math.BigInteger;
+import java.util.*;  
+import java.text.DecimalFormat;
   
 import org.jnetpcap.Pcap;  
 import org.jnetpcap.PcapIf;  
@@ -19,14 +18,16 @@ import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.network.Ip4;
 
 
-public class capturePackets {  
+public class monitorRequests {  
 	static String ip = null;
 	static PcapIf nic = null;
 	static StringBuilder errbuf;
 	
 	static int servicePort;
 	
-	public capturePackets(String ip)
+	static HashMap<String, numReqRes> cntRQ = new HashMap<String, numReqRes>();
+	
+	public monitorRequests(String ip)
 	{
 		this.ip = ip;
 		servicePort = Configuration.getServicePort();
@@ -67,7 +68,9 @@ public class capturePackets {
         int timeout = 10 * 1000;           // 10 seconds in millis  
         Pcap pcap = Pcap.openLive(nic.getName(), snaplen, flags, timeout, errbuf);  
   
-        if (pcap == null) 
+		cntRQ.clear();
+		
+        if (pcap == null)  
 		{  
             System.err.printf("Error while opening device for capture: "  
                 + errbuf.toString());  
@@ -114,50 +117,146 @@ public class capturePackets {
 					
 					// Should be analyzed
 					if((servicePort == srcPort) || (servicePort == dstnPort))
-					{
+					{						
 						// HTTP packet
 						if(servicePort == 80)
-						{
-							if(packet.hasHeader(http) && packet.hasHeader(payload))
-							{			
-								payloadContent = http.getPayload();
-								content = "## HTTP : " + new String(payloadContent);
+						{						
+							if(packet.hasHeader(http))
+							{
+								if(packet.hasHeader(payload))
+								{	
+									
+									payloadContent = http.getPayload();
+									content = "## HTTP : " + new String(payloadContent);
+								}
 								
-								//#################
-//								count (srcPort, dstnPort);
-							}
+							}analyze (srcPort, dstnPort);
 						}
 						
 						else
-						{
-//							count (srcPort, dstnPort);
-						}
+							analyze (srcPort, dstnPort);
 						
-						System.out.println(srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort + " ");
-						System.out.println(content);
+						System.out.println("\n >> PACKET : " + srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort + " ");
+//						System.out.println(content);
 					}					
 				}				
             }
-			
-			
-/*			public void countRQRS(String srcPort, String dstnPort)
+						
+			public void analyze(int srcPort, int dstnPort)
 			{
+				Iterator<String> itRQ = cntRQ.keySet().iterator();
+
 				// request
 				if(dstnPort == servicePort)
-				{
-					count srcIP --> by ip
+				{	
+					boolean flag = false;
+					
+					while(itRQ.hasNext())
+					{	
+						String key = itRQ.next();
+						
+						if(key.equals(srcIP))
+						{						
+							numReqRes RQ = cntRQ.get(key);
+							
+							int value = RQ.getReq();
+							value++;
+							
+							RQ.setReq(value);
+							
+							cntRQ.put(key, RQ);
+							flag = true;
+							
+							break;
+						}
+					}
+					
+					if(!flag) // this it the first IP show
+					{	
+						numReqRes RQ = new numReqRes (1, 0);
+						cntRQ.put(srcIP, RQ);
+					}
 				}
 				
 				// response
 				if(srcPort == servicePort)
-				{
-					count dstnIP --> by ip
+				{	
+					boolean flag = false;
+					
+					while(itRQ.hasNext())
+					{	
+						String key = itRQ.next();
+						
+						if(key.equals(dstnIP))
+						{	
+							numReqRes RQ = cntRQ.get(key);
+							
+							int value = RQ.getRes();
+							value++;
+							
+							RQ.setRes(value);
+							
+							cntRQ.put(key, RQ);
+							flag = true;
+							
+							break;
+						}
+					}
+					
+					if(!flag) // this it the first IP show
+					{	
+						numReqRes RQ = new numReqRes (0, 1);
+						cntRQ.put(dstnIP, RQ);
+					}
 				}
+				
 			}
-*/		};
+			
+		};
 		
-		pcap.loop(5, jpacketHandler, "jNetPcap rocks!");
+		pcap.loop(5, jpacketHandler, "jNetPcap rocks!");	
+		sendRequest();
 		
         pcap.close();  
-    }  
+    }
+	
+	public static void sendRequest()
+	{
+		RequestInfo req_info;
+		RequestType request = new RequestType();
+		int infoType = Configuration.REQUEST;
+		double ratio = 0;
+		
+		Iterator<String> itRQ = cntRQ.keySet().iterator();
+			
+		System.out.println("############## MyIP <-> neighIP : REQ , RES, RES/REQ ################");			
+		while(itRQ.hasNext())
+		{
+			String key = itRQ.next();
+			numReqRes RQ = cntRQ.get(key);
+			
+			int req = RQ.getReq();
+			int res = RQ.getRes();
+			
+			if(req != 0)
+				ratio = decimalFormat((double)res / req);
+			
+			System.out.println(ip + "<->" + key + " : " + req + " , " + res + " , " + ratio);
+			
+
+			req_info = new RequestInfo(ip, key, servicePort, req, res, ratio);
+			request.SetIsXml(infoType);
+			request.SetRequestInfo(req_info);
+			
+			Send2Server.Send(request);			
+		}		
+	}
+	
+	public static double decimalFormat(double usage) {
+        DecimalFormat format = new DecimalFormat();
+        format.applyLocalizedPattern("0.##");
+
+        double result = Double.parseDouble(format.format(usage));
+        return result;
+    }
 }  

@@ -1,5 +1,6 @@
 package monitor;
 
+import datatype.*;
 import com.mongodb.*;
 import java.util.*;
 import java.text.DecimalFormat;
@@ -27,34 +28,36 @@ public class setCollection
 	}
 	
 	public setCollection(){}
-
-	// Set the first values of utilization/response time into the history table 
-	public static void initialize()
-	{
-		dataTypes.clear();
-
-		dataTypes.add("CPU");
-		dataTypes.add("RAM");
-		dataTypes.add("Disk");
-		dataTypes.add("Inbound");
-		dataTypes.add("Outbound");
-		dataTypes.add("RT");
-	}
 	
 	// All changes are updated into MINUTE fields 
-	public static void updateCollection(String ip, String type, String value)
-	{			
-		if(collection.count() == 0)
-			initialize();
-			
+	public static void updateUtilization(String ip, String type, String value)
+	{					
 		BasicDBObject queryIP = new BasicDBObject("IP",ip);
 		BasicDBObject newValue = new BasicDBObject("TS", (int)(System.currentTimeMillis()/1000))
-				.append(type,value);
+									.append(type,value);
 		BasicDBObject updateValue = new BasicDBObject("$push", new BasicDBObject("MIN",newValue));
 						
 		collection.update(queryIP,updateValue,true,false);
 			
 		BasicDBObject updateLastValue = new BasicDBObject("$set", new BasicDBObject("L"+type, value));			
 		collection.update(queryIP, updateLastValue, false, false); 
+	}
+	
+	// All changes are updated into MINUTE fields 
+	public static void updateRequest(String type, RequestInfo request)
+	{	
+		String ip = request.myIP;
+		
+		BasicDBObject queryIP = new BasicDBObject("IP",ip);
+		BasicDBObject neighbor = new BasicDBObject("neighbor", new BasicDBObject("TS", Long.toString(System.currentTimeMillis()/1000))
+																.append("address", request.neighIP+"_"+Integer.toString(request.port))
+																.append("req", Integer.toString(request.req))
+																.append("res", Integer.toString(request.res))
+																.append("ratio", Double.toString(request.ratio)));
+		
+		BasicDBObject newValue = new BasicDBObject("RQ", neighbor);
+		BasicDBObject updateValue = new BasicDBObject("$push", new BasicDBObject("MIN",newValue));
+
+		collection.update(queryIP, updateValue,true,false);							
 	}
 }

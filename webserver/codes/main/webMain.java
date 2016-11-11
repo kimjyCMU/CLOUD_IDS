@@ -18,8 +18,9 @@ public class webMain
 	static String dbName = null; // 
 	static String collName = null; // 
 
-//	public static void main(String args[]){
-	public webMain() throws UnknownHostException{
+//	public static void main(String args[])
+	public webMain() throws UnknownHostException
+	{
 		Configuration.setConfiguration();
 		dbIP = Configuration.getDBIP();
 		dbPort = Configuration.getDBPort();
@@ -29,6 +30,9 @@ public class webMain
 		DBconnection db = new DBconnection(dbIP, dbPort, dbName);
 			
 		ActionServlet servlet = new ActionServlet();
-		getData data = new getData(db.getThisDB(), collName);	
+		getUtilization util = new getUtilization(db.getThisDB(), collName);	
+		getRequests RQ = new getRequests(db.getThisDB(), collName);	
+		
+//		System.out.println(RQ.getResult("10.1.128.24", "request"));
 	}
 }

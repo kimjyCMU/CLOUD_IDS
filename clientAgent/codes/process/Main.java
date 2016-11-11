@@ -55,7 +55,7 @@ public class Main {
             System.err.println("Cannot get the IP of this server.");
         }
         
-        getSystem system = new getSystem(); 
+		getSystem system = new getSystem(); 
 		getNetwork network = new getNetwork();
 		getRequest request = new getRequest();
     }

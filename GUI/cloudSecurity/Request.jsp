@@ -27,6 +27,7 @@
 <form id="dataForm" >
 	<input type="hidden" id="system" value=""/>
 	<input type="hidden" id="network" value=""/>
+	<input type="hidden" id="request" value=""/>
 </form>
 
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
@@ -46,24 +47,24 @@
 
 function ajaxdata(indexIP){
 	var ajaxResult="";     
-	document.getElementById("network").value=indexIP;     
+	document.getElementById("request").value=indexIP;     
 	
 	var msgSystem=$('#system').val(); 
 	var msgNetwork=$('#network').val();
+	var msgRequest=$('#request').val();
 
 	$.ajax({
 		'async': false,
 		'url':'ActionServlet',
 		'dataType':"json",
-		'data':{system:msgSystem,network:msgNetwork},
+		'data':{system:msgSystem,network:msgNetwork,request:msgRequest},
 		'success':function(responseText){
 			ajaxResult=responseText;
 		}	
 	});
-	document.getElementById("network").value=null;      
+	document.getElementById("request").value=null;      
 	return ajaxResult;
 }
-
 
 var pageWidth = window.innerWidth,
     pageHeight = window.innerHeight;
@@ -83,19 +84,22 @@ var WIDTH = pageWidth/1.2,
 	MARGINS = {top: 20, right: 100, bottom: 30, left: 50};
 
 var indexIP=<%=ip%>;
-console.log(indexIP);
-var data = ajaxdata(indexIP);
+console.log("ip" + indexIP);
 
-console.log(data);
-var numType = 0;
+var data = ajaxdata(indexIP);
+var neighbors = [];
 
 data.forEach(function(d){
 	d.TS = new Date(+d.TS*1000);	
-	numType = d.Type.length;
+	
+	if(neighbors.indexOf(d.Addr) < 0)
+		neighbors.push(d.Addr);
 });	
-console.log(data);
 
-var metrics = ["Inbound", "Outbound"];
+console.log(data);
+console.log(neighbors);
+
+var metrics = ["req", "res","ratio"];
 
 var dataGroup = d3.nest()
       .key(function(d) {return d.Type;})
@@ -106,15 +110,8 @@ console.log(JSON.stringify(dataGroup));
 var currentTime = new Date();
 
 var	xScale = d3.time.scale().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), currentTime]);
-var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, d3.max(data, function(d) {return d.Value * 1.1;})]);
+var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, d3.max(data, function(d) {return d.Value;})]);
 
-/*
-var xScale = d3.time.scale().range([0, WIDTH]);
-var yScale = d3.scale.linear().range([HEIGHT, 0]);
-	
-var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(-HEIGHT, 0).tickPadding(6);
-var yAxis = d3.svg.axis().scale(yScale).orient("right").tickSize(-WIDTH).tickPadding(6);
-*/
 var xAxis = d3.svg.axis().scale(xScale).tickSize(-HEIGHT).orient("bottom").tickSubdivide(true).tickPadding(10);
 var yAxis = d3.svg.axis().scale(yScale).tickSize(-WIDTH).orient("left").tickSubdivide(true).tickPadding(10);
 
@@ -150,7 +147,7 @@ var svg = d3.select("body").append("svg")
 	.attr("transform", "rotate(-90)")
 	.attr("y", MARGINS.left-50)
 	.attr("x", -HEIGHT/2)
-	.text('Network traffic (bps)');
+	.text('#req / # res');
 		
 	svg.append("clipPath")
 		.attr("id", "clip")
@@ -196,20 +193,14 @@ function draw() {
 function utilColor(type)
 {
 	var color;
-	if(type == "CPU")
+	if(type == "req")
 		color = "red";
 	
-	if(type == "RAM")
+	if(type == "res")
 		color = "orange";
 		
-	if(type == "Disk")
+	if(type == "ratio")
 		color = "green";
-		
-	if(type == "Inbound")
-		color = "blue";
-		
-	if(type == "Outbound")
-		color = "purple";
 		
 	return color;
 }

@@ -17,7 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ActionServlet extends HttpServlet {
  private static final long serialVersionUID = 1L;
-	getData data;
+	getUtilization utilData;
+	getRequests requestData;
 	
     static String name="";
     public ActionServlet(){  
@@ -33,12 +34,20 @@ public class ActionServlet extends HttpServlet {
   
    // Response utilization history of a clicked machine 
   if(!request.getParameter("system").toString().equals("")){
-	name = data.getResult(request.getParameter("system").toString(), "system"); 
+	name = "";
+	name = utilData.getResult(request.getParameter("system").toString(), "system"); 
 	response.getWriter().write(name); 
   }
   
   else if(!request.getParameter("network").toString().equals("")){
-	name = data.getResult(request.getParameter("network").toString(), "network"); 
+  	name = "";
+	name = utilData.getResult(request.getParameter("network").toString(), "network"); 
+	response.getWriter().write(name); 
+  }
+  
+  else if(!request.getParameter("request").toString().equals("")){
+  	name = "";
+	name = requestData.getResult(request.getParameter("request").toString(), "request"); 
 	response.getWriter().write(name); 
   }
  }

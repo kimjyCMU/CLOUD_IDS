@@ -18,6 +18,6 @@ echo "========================="
 echo $i
 
 ssh $user@$i "mkdir -p /home/$user/cloudSecurity"
-scp -r $DIR/deploy/files/* $user@$i:/home/$user/cloudSecurity
-
+#scp -r $DIR/deploy/files/* $user@$i:/home/$user/cloudSecurity
+scp -r $DIR/deploy/files/cloudSecurity.jar $user@$i:/home/$user/cloudSecurity
 done

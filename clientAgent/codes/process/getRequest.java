@@ -21,39 +21,20 @@ public class getRequest extends Thread{
 }
 
 class SendRequest extends Thread {
-	private RequestInfo req_info;
     
 	public void run() {
 		String ip = Main.getSystemIP();
-		int port = Configuration.getServicePort();
-		this.req_info = new RequestInfo(ip, port);
-		
-//		monitorRequest monitorRequest = new monitorRequest();
-		capturePackets packet = new capturePackets(ip);		
-		
-		
+		monitorRequests packet = new monitorRequests(ip);		
+				
 		while(true)
 		{
 			packet.capture();
-			
-			Sendtoserver(Configuration.REQUEST);
 			 
 			try{
 				Thread.sleep(Configuration.getRequestInterval());
-			} 
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
    }
-	
-	public void Sendtoserver(int infoType) 
-	{
-        RequestType request = new RequestType();
-        request.SetIsXml(infoType);
-		
-		request.SetRequestInfo(this.req_info);
-		
-        Send2Server.Send(request);
-    }
 }
