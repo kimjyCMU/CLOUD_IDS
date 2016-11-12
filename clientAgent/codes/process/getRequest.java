@@ -16,6 +16,9 @@ public class getRequest extends Thread{
 	
     public getRequest(){		
 		t = new SendRequest();
+    }
+	
+	public void startRequest(){		
 		t.start();
     }
 }

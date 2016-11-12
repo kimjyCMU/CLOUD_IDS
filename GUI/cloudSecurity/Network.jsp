@@ -148,7 +148,7 @@ var svg = d3.select("body").append("svg")
 	.append("text")
 	.attr("class", "axis-label")
 	.attr("transform", "rotate(-90)")
-	.attr("y", MARGINS.left-50)
+	.attr("y", MARGINS.left-70)
 	.attr("x", -HEIGHT/2)
 	.text('Network traffic (bps)');
 		

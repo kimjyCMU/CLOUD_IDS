@@ -118,12 +118,12 @@ public class getUtilization
 			{		
 				ArrayList<String> lastUtil = getLastData(clickedIP);
 				
-				for(int k=0; metrics.size() >k; k++)
+/*				for(int k=0; metrics.size() >k; k++)
 				{
 					dataForm = new dataFormat((int)(System.currentTimeMillis()/1000), clickedIP, lastUtil.get(k), metrics.get(k));
 					tsData.add(dataForm);
 				}			
-									
+*/									
 				data = "[";
 				
 				ArrayList<dataFormat> newTsUtil = sortTS(tsData);

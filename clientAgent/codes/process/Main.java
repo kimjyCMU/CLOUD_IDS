@@ -58,6 +58,9 @@ public class Main {
 		getSystem system = new getSystem(); 
 		getNetwork network = new getNetwork();
 		getRequest request = new getRequest();
+		
+		if(Configuration.getServicePort() != 0)
+			request.startRequest();
     }
 
     public static String getIp() throws UnknownHostException {

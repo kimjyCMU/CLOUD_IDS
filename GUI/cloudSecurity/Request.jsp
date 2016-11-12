@@ -66,6 +66,7 @@ function ajaxdata(indexIP){
 	return ajaxResult;
 }
 
+
 var pageWidth = window.innerWidth,
     pageHeight = window.innerHeight;
     if (typeof pageWidth != "number"){
@@ -87,25 +88,74 @@ var indexIP=<%=ip%>;
 console.log("ip" + indexIP);
 
 var data = ajaxdata(indexIP);
-var neighbors = [];
+var neighborAddr = [];
+var neighNum = 0;
 
 data.forEach(function(d){
 	d.TS = new Date(+d.TS*1000);	
 	
-	if(neighbors.indexOf(d.Addr) < 0)
-		neighbors.push(d.Addr);
+	if(neighborAddr.indexOf(d.Addr) < 0)
+		neighborAddr.push(d.Addr);
+	
+	neighNum = neighborAddr.length;
 });	
 
 console.log(data);
-console.log(neighbors);
+console.log(neighborAddr);
+console.log(neighNum);
 
-var metrics = ["req", "res","ratio"];
+// ### Edit this array for your preference (out of "req", "res","ratio") ### //
+var metricType = ["req", "res","ratio"]; 
+var metrics = [];
+var metricGroup;
 
-var dataGroup = d3.nest()
+// for a specific neighbor
+var neighbors = new Array();
+var neighborGroups = new Array();
+
+for(var i=0; i < neighNum; i++)
+{
+	neighbors[i] = new Array();
+	neighborGroups[i] = new Array();
+}
+
+for(var i=0; i < data.length; i++)
+{
+	for(var k=0; k < neighNum; k++)
+	{
+		if(data[i].Addr == neighborAddr[k])
+		{
+			data[i].Type = data[i].Addr + "/" + data[i].Type;
+			neighbors[k].push(data[i]);
+			break;
+		}
+	}
+}
+
+for(var i=0; i < data.length; i++)
+{
+	for(var k=0; k < metricType.length; k++)
+	{
+		if(data[i].Type.includes(metricType[k]))
+		{
+			metrics.push(data[i]);
+			break;
+		}
+	}
+}
+
+// a specific metric or all the metrics
+metricGroup = d3.nest()
       .key(function(d) {return d.Type;})
-      .entries(data);
+      .entries(metrics);
 
-console.log(JSON.stringify(dataGroup));
+// a specific neighbor
+for(var k=0; k < neighNum; k++)
+{
+	neighborGroups[k] = d3.nest()
+      .key(function(d) {return d.Type;})
+      .entries(neighbors[k]);
+}
 
 var currentTime = new Date();
 
@@ -113,9 +163,9 @@ var	xScale = d3.time.scale().range([MARGINS.left, WIDTH - MARGINS.right]).domain
 var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, d3.max(data, function(d) {return d.Value;})]);
 
 var xAxis = d3.svg.axis().scale(xScale).tickSize(-HEIGHT).orient("bottom").tickSubdivide(true).tickPadding(10);
-var yAxis = d3.svg.axis().scale(yScale).tickSize(-WIDTH).orient("left").tickSubdivide(true).tickPadding(10);
+var yAxis = d3.svg.axis().scale(yScale).tickSize(-WIDTH).orient("left").tickSubdivide(true).tickPadding(10);  
 
-var lSpace = WIDTH/dataGroup.length;  
+var color = d3.scale.category10();
 	
 // Draw lines
 var lineGen = d3.svg.line()
@@ -156,20 +206,29 @@ var svg = d3.select("body").append("svg")
 		.attr("width", WIDTH - MARGINS.right)
 		.attr("height",HEIGHT - MARGINS.top);
 
-metrics.forEach(function(d,i) {		   
+
+var dataType = [];
+
+// ##### Choose metrics or neighbors[x] #### //
+metrics.forEach(function(d){ 
+	
+	if(dataType.indexOf(d.Type) < 0)
+		dataType.push(d.Type);
+});	
+
+dataType.forEach(function(d,i) {		   
    svg.append('rect')
-   		.attr("x", WIDTH - (MARGINS.right/2))
+   		.attr("x", WIDTH - (MARGINS.right/1.5+30))
 		.attr("y", MARGINS.top + (i * 20))
 		.attr('width', 10)
 		.attr('height', 10)
-		.style('fill', utilColor(d));
+		.style('fill', color(i));
 		
    svg.append('text')
-		.attr('x', WIDTH - (MARGINS.right/2) + 30)
+		.attr('x', WIDTH - (MARGINS.right/1.5))
 		.attr('y', MARGINS.top + (i * 20 +10))
 		.text(d);
 	});
-
 	svg.call(d3.behavior.zoom().x(xScale).on("zoom", zoom));
 	draw();	
 	
@@ -178,31 +237,18 @@ function draw() {
   
   svg.select("g.x.axis").call(xAxis);
   svg.select("g.y.axis").call(yAxis); 
- 
-  dataGroup.forEach(function(d,i) {
+
+// ##### Choose metricGroup or neighborGroups[x] #### //
+  metricGroup.forEach(function(d,i) { 
 	svg.append("path")
 		.attr('d', lineGen(d.values))
 		.attr("clip-path","url(#clip)")
-		.attr('stroke', utilColor(d.key))
+		.attr('stroke', color(i))
 		.attr("cursor","move")
 		.attr("pointer-events","all")
-        .attr('fill', 'none');
+		.attr('fill', 'none');
 	});
-}
 
-function utilColor(type)
-{
-	var color;
-	if(type == "req")
-		color = "red";
-	
-	if(type == "res")
-		color = "orange";
-		
-	if(type == "ratio")
-		color = "green";
-		
-	return color;
 }
 
 function zoom() {
