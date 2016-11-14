@@ -110,6 +110,15 @@ public class Socketserver extends Thread{
 													
 						dataCollection.updateRequest("RQ", requestInfo);												
 					}
+					
+					// receive unitaction data
+					if(request.getType()==Configuration.UNITACTION)
+					{
+						UAInfo uaInfo = request.getUAInfo();
+						ip = uaInfo.ip;
+													
+						dataCollection.updateUtilization(ip, "UA", uaInfo.UA);										
+					}
 				} 
 				catch (ClassNotFoundException e) 
 				{

@@ -248,7 +248,22 @@ public class monitorRequests {
 			request.SetIsXml(infoType);
 			request.SetRequestInfo(req_info);
 			
-			Send2Server.Send(request);			
+			Send2Server.Send(request);	
+
+			 // Check Unit action
+			 boolean flag = false;
+			 
+			 if(req > Configuration.getThresholdRequestPair() ||
+				res > Configuration.getThresholdRequestPair())
+				flag = true;
+			
+			unitAction ua = new unitAction();
+			ua.setUnitAction(Configuration.REQUESTPAIR, flag);		
+			
+			if(ratio > Configuration.getThresholdRequestRatio())
+					flag = true;
+			
+			ua.setUnitAction(Configuration.REQUESTRATIO, flag);		
 		}		
 	}
 	

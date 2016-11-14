@@ -41,6 +41,18 @@ class SendSystem extends Thread {
 				
 			 Sendtoserver(Configuration.SYSTEM);
 			 
+			 boolean flag = false;
+			 
+			 // Check Unit action
+			 if(this.system_info.cpu > Configuration.getThresholdCPU() ||
+				this.system_info.mem > Configuration.getThresholdRAM() ||
+				this.system_info.disk > Configuration.getThresholdDISK())
+					flag = true;
+			
+			unitAction ua = new unitAction();
+			ua.setUnitAction(Configuration.SYSTEM, flag);
+				
+			 
 			 try{
 				Thread.sleep(Configuration.getSystemInterval());
 			} 

@@ -17,10 +17,13 @@ public class Configuration {
 	private static String collection=null;
 	
 	// message codes
-	public static final int SYSTEM = 1;
+    public static final int SYSTEM = 1;
 	public static final int NETWORK = 2;
 	public static final int REQUEST = 3;
-	public static final int UNITACTION = 4;
+	public static final int REQUESTPAIR = 4;
+	public static final int REQUESTRATIO = 5;
+	public static final int UNITACTION = 6;
+	
 	
 	/*** read a configuration file and assign all the configuration parameters to variables ***/
 	public static void setConfiguration()

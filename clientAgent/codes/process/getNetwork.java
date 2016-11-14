@@ -41,6 +41,16 @@ class SendNetwork extends Thread {
 					
 			 Sendtoserver(Configuration.NETWORK);
 			 
+			 // Check Unit action
+			 boolean flag = false;
+			 
+			 if(this.network_info.netin > Configuration.getThresholdInbound() ||
+				this.network_info.netout > Configuration.getThresholdOutbound())
+					flag = true;
+			
+			unitAction ua = new unitAction();
+			ua.setUnitAction(Configuration.NETWORK, flag);
+			 
 			try{
 				Thread.sleep(Configuration.getNetworkInterval());
 			} 

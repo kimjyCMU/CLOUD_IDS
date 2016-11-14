@@ -44,10 +44,15 @@ public class getUtilization
 			metrics.add("Disk");
 		}
 		
-		else if(dataType.equals("network"))
+		if(dataType.equals("network"))
 		{
 			metrics.add("Inbound");
 			metrics.add("Outbound");
+		}
+		
+		if(dataType.equals("UA"))
+		{
+			metrics.add("UA");
 		}
 
 		//#############################//
@@ -72,10 +77,10 @@ public class getUtilization
 				for(int j=0; object.size() > j; j++)
 				{					
 					for(int k=0; metrics.size() > k; k++)
-					{
+					{	
 						String type = metrics.get(k);
 						String value = (String)object.get(j).get(type);
-						
+						System.out.println(type + " / " + value);
 						if(value != null)
 						{				
 							int ts = (int)object.get(j).get("TS");

@@ -19,6 +19,7 @@ public class ActionServlet extends HttpServlet {
  private static final long serialVersionUID = 1L;
 	getUtilization utilData;
 	getRequests requestData;
+	getUA UAData;
 	
     static String name="";
     public ActionServlet(){  
@@ -48,6 +49,13 @@ public class ActionServlet extends HttpServlet {
   else if(!request.getParameter("request").toString().equals("")){
   	name = "";
 	name = requestData.getResult(request.getParameter("request").toString(), "request"); 
+	response.getWriter().write(name); 
+  }
+  
+  else if(!request.getParameter("UA").toString().equals("")){
+  	name = "";
+	name = utilData.getResult(request.getParameter("UA").toString(), "UA"); 
+	name = UAData.getResult(request.getParameter("UA").toString(), "UA");
 	response.getWriter().write(name); 
   }
  }

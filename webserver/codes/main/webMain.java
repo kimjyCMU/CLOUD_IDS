@@ -32,7 +32,9 @@ public class webMain
 		ActionServlet servlet = new ActionServlet();
 		getUtilization util = new getUtilization(db.getThisDB(), collName);	
 		getRequests RQ = new getRequests(db.getThisDB(), collName);	
+		getUA ua = new getUA(db.getThisDB(), collName);
 		
-//		System.out.println(RQ.getResult("10.1.128.24", "request"));
+//		System.out.println(ua.getResult("10.1.128.27", "UA"));
+//		System.out.println(util.getResult("10.1.128.27", "UA"));
 	}
 }

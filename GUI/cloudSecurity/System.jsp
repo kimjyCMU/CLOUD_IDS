@@ -86,7 +86,6 @@ var indexIP=<%=ip%>;
 console.log(indexIP);
 var data = ajaxdata(indexIP);
 
-console.log(data);
 var numType = 0;
 data.forEach(function(d){
 	d.TS = new Date(+d.TS*1000);	

@@ -15,6 +15,7 @@ public class Configuration {
 	private static int systemInterval;
 	private static int networkInterval;
 	private static int requestInterval;
+	private static int UAInterval;
 	
 	private static int avgCPU;
 	private static int avgRAM;
@@ -32,10 +33,17 @@ public class Configuration {
 	private static int thresholdRequestPair;
 	private static double thresholdRequestRatio;
 	
+	private static String systemUA = null;
+	private static String networkUA = null;
+	private static String requestPairUA = null;
+	private static String requestRatioUA = null;
+	
     public static final int SYSTEM = 1;
 	public static final int NETWORK = 2;
 	public static final int REQUEST = 3;
-	public static final int UNITACTION = 4;
+	public static final int REQUESTPAIR = 4;
+	public static final int REQUESTRATIO = 5;
+	public static final int UNITACTION = 6;
 
     public static void setConfiguration() 
 	{
@@ -71,6 +79,9 @@ public class Configuration {
 
 				else if (parameter.equals("request_interval"))
                     requestInterval = Integer.parseInt(value);		
+								
+				else if (parameter.equals("UA_interval"))
+                    UAInterval = Integer.parseInt(value);
 
 				//###### Set monitoring intervals ######
 				else if (parameter.equals("system_interval"))
@@ -124,7 +135,19 @@ public class Configuration {
                     thresholdRequestPair = Integer.parseInt(value);
 
 				else if (parameter.equals("Request_ratio_threshold"))
-                    thresholdRequestRatio = Double.parseDouble(value);					
+                    thresholdRequestRatio = Double.parseDouble(value);		
+
+				else if (parameter.equals("system_UA"))
+                    systemUA = value;		
+
+				else if (parameter.equals("network_UA"))
+                    networkUA = value;		
+
+				else if (parameter.equals("request_pair_UA"))
+                    requestPairUA = value;		
+
+				else if (parameter.equals("request_ratio_UA"))
+                    requestRatioUA = value;					
 				
                 sLine = null;
             }
@@ -164,6 +187,10 @@ public class Configuration {
 	
 	public static int getRequestInterval() {
         return requestInterval;
+    }
+	
+	public static int getUAInterval() {
+        return UAInterval;
     }
 	
 	//##################################
@@ -224,6 +251,23 @@ public class Configuration {
         return thresholdRequestRatio;
     }
 	
+	// Unit actions
+	public static String getSystemUA() {
+        return systemUA;
+    }
+	
+	public static String getNetworkUA() {
+        return networkUA;
+    }
+	
+	public static String getRequestPairUA() {
+        return requestPairUA;
+    }
+	
+	public static String getRequestRatioUA() {
+        return requestRatioUA;
+    }
+	
 	//######################## Test #####
 	public static void printAll()
 	{
@@ -234,6 +278,7 @@ public class Configuration {
 		System.out.println(getSystemInterval());
 		System.out.println(getNetworkInterval());
 		System.out.println(getRequestInterval());
+		System.out.println(getUAInterval());
 		System.out.println(getAvgCPU());
 		System.out.println(getAvgRAM());
 		System.out.println(getAvgDISK());	
@@ -247,6 +292,10 @@ public class Configuration {
 		System.out.println(getThresholdInbound());
 		System.out.println(getThresholdOutbound());
 		System.out.println(getThresholdRequestPair());			
-		System.out.println(getThresholdRequestRatio());			
+		System.out.println(getThresholdRequestRatio());		
+		System.out.println(getSystemUA());
+		System.out.println(getNetworkUA());
+		System.out.println(getRequestPairUA());			
+		System.out.println(getRequestRatioUA());			
 	}
 }

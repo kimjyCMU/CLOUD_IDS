@@ -9,6 +9,7 @@ public class RequestType implements Serializable {
     private SystemInfo system_info = null;
 	private NetworkInfo network_info = null;
 	private RequestInfo request_info = null;
+	private UAInfo UA_info = null;
     private IPPortPair remoteserver;
 
 	// only for the client
@@ -54,5 +55,14 @@ public class RequestType implements Serializable {
 
     public RequestInfo getRequestInfo() {
         return this.request_info;
+    }
+	
+	// ### Unit Action ###//
+	public void SetUAInfo(UAInfo ui) {
+        this.UA_info = ui;
+    }
+
+    public UAInfo getUAInfo() {
+        return this.UA_info;
     }
 }

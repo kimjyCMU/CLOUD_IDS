@@ -171,7 +171,7 @@ var color = d3.scale.category10();
 var lineGen = d3.svg.line()
 	.x(function(d) {return xScale(d.TS);})
     .y(function(d) {return yScale(d.Value);})
-    .interpolate("basis");
+;
 
 // Draw x axis and y axis
 var svg = d3.select("body").append("svg")
