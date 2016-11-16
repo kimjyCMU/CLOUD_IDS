@@ -20,6 +20,7 @@ public class ActionServlet extends HttpServlet {
 	getUtilization utilData;
 	getRequests requestData;
 	getUA UAData;
+	getAllUAs allUAsData;
 	
     static String name="";
     public ActionServlet(){  
@@ -54,8 +55,13 @@ public class ActionServlet extends HttpServlet {
   
   else if(!request.getParameter("UA").toString().equals("")){
   	name = "";
-	name = utilData.getResult(request.getParameter("UA").toString(), "UA"); 
-	name = UAData.getResult(request.getParameter("UA").toString(), "UA");
+	name = UAData.getResult(request.getParameter("UA").toString(), "UA"); 
+	response.getWriter().write(name); 
+  }
+  
+  else if(!request.getParameter("allUAs").toString().equals("")){
+  	name = "";
+	name = allUAsData.getResult("UA");
 	response.getWriter().write(name); 
   }
  }

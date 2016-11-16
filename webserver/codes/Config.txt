@@ -1,4 +1,4 @@
 DB IP address=127.0.0.1
 DB port=27017
 DB name=cloudSecurity
-Collection name=data
+Collection name=password

@@ -85,19 +85,19 @@ public class getRequests
 											
 			data = "[";
 				
-			ArrayList<dataFormat> newTsUtil = sortTS(tsData);
+			Iterator<dataFormat> it = tsData.iterator();
 			
-			for(int i = 0; i < newTsUtil.size(); i++)
+			while(it.hasNext())
 			{
-				dataForm = newTsUtil.get(i);		
+				dataForm = it.next();	
 
 				data += "{\"Type\" : \"" + dataForm.getType() + "\",";
 				data += "\"Addr\" : \"" + dataForm.getAddr() + "\",";
 				data += "\"TS\" : \"" + dataForm.getTS() + "\",";
 				data += "\"Value\" : \"" + dataForm.getValue() + "\"}";	
 		
-				if(i+1 != newTsUtil.size())
-					data += ",";					
+				if(it.hasNext())
+					data += ",";						
 			}			
 
 			if(cursor.hasNext())
@@ -107,47 +107,6 @@ public class getRequests
 		data += "]";
 		
 		return data;
-	}
-	
-	public static ArrayList<dataFormat> sortTS(HashSet<dataFormat> old)
-	{
-		ArrayList<dataFormat> newUtil = new ArrayList<dataFormat>();
-		ArrayList<dataFormat> oldUtil = new ArrayList<dataFormat>(old);
-		
-		// make a list of TS
-		HashSet<Integer> tsList = new HashSet<Integer>();
-		dataFormat dataForm;
-		
-		for(int i = 0; oldUtil.size() > i; i++)
-		{
-			dataForm = oldUtil.get(i);
-			tsList.add(dataForm.getTS());
-		}
-		
-		// sort
-		List sortedList = new ArrayList(tsList);
-		Collections.sort(sortedList);
-		
-		// get newUtil
-		for(int i = 0; sortedList.size() > i; i++)
-		{
-			int minTS = (int)sortedList.get(i);
-			
-			for(int j = 0; oldUtil.size() > j; j++)
-			{
-				dataForm = oldUtil.get(j);
-				int myTS = dataForm.getTS();
-				
-				if(myTS == minTS)
-				{
-					newUtil.add(dataForm);
-					oldUtil.remove(j);
-					j--;
-				}
-			}
-		}
-				
-		return newUtil;
 	}
 	
 	public static Cursor getCursor(String ip) throws MongoException

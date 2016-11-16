@@ -22,6 +22,8 @@ public class monitorRequests {
 	static String ip = null;
 	static PcapIf nic = null;
 	static StringBuilder errbuf;
+	static boolean pcapFlag = true;
+	static final int CAPTURE_INTERVAL = Configuration.getRequestInterval();
 	
 	static int servicePort;
 	
@@ -60,13 +62,19 @@ public class monitorRequests {
 			}
         }  
 	}
+	
+	public void setFlag()
+	{
+		pcapFlag = false;
+	}
   
-    public static void capture() 
+    public void capture() 
 	{  
         int snaplen = 64 * 1024;           // Capture all packets, no trucation  
         int flags = Pcap.MODE_PROMISCUOUS; // capture all packets  
-        int timeout = 10 * 1000;           // 10 seconds in millis  
-        Pcap pcap = Pcap.openLive(nic.getName(), snaplen, flags, timeout, errbuf);  
+        int timeout = Configuration.getRequestInterval();           // 10 seconds in millis  
+        final Pcap pcap = Pcap.openLive(nic.getName(), snaplen, flags, timeout, errbuf);  
+		final long interval = System.currentTimeMillis() + CAPTURE_INTERVAL;
   
 		cntRQ.clear();
 		
@@ -102,44 +110,53 @@ public class monitorRequests {
 			
             public void nextPacket(PcapPacket packet, String user) 
 			{
-				if (packet.hasHeader(ip))
-				{
-					sIP = packet.getHeader(ip).source();
-					srcIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
-					dIP = packet.getHeader(ip).destination();
-					dstnIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-				}
+				if (System.currentTimeMillis() > interval) 
+				{  
+					sendRequest();
+					pcap.breakloop();  
+                }
 				
-				if (packet.hasHeader(tcp)) 
+				else
 				{
-					srcPort = tcp.source();
-					dstnPort = tcp.destination();
+					if (packet.hasHeader(ip))
+					{
+						sIP = packet.getHeader(ip).source();
+						srcIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
+						dIP = packet.getHeader(ip).destination();
+						dstnIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
+					}
 					
-					// Should be analyzed
-					if((servicePort == srcPort) || (servicePort == dstnPort))
-					{						
-						// HTTP packet
-						if(servicePort == 80)
+					if (packet.hasHeader(tcp)) 
+					{
+						srcPort = tcp.source();
+						dstnPort = tcp.destination();
+						
+						// Should be analyzed
+						if((servicePort == srcPort) || (servicePort == dstnPort))
 						{						
-							if(packet.hasHeader(http))
-							{
-								if(packet.hasHeader(payload))
-								{	
+							// HTTP packet
+							if(servicePort == 80)
+							{						
+								if(packet.hasHeader(http))
+								{
+									if(packet.hasHeader(payload))
+									{	
+										
+										payloadContent = http.getPayload();
+										content = "## HTTP : " + new String(payloadContent);
+									}
 									
-									payloadContent = http.getPayload();
-									content = "## HTTP : " + new String(payloadContent);
-								}
-								
-							}analyze (srcPort, dstnPort);
-						}
-						
-						else
-							analyze (srcPort, dstnPort);
-						
-						System.out.println("\n >> PACKET : " + srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort + " ");
-//						System.out.println(content);
-					}					
-				}				
+								}analyze (srcPort, dstnPort);
+							}
+							
+							else
+								analyze (srcPort, dstnPort);
+							
+							System.out.println("\n >> PACKET : " + srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort + " ");
+	//						System.out.println(content);
+						}					
+					}
+				}					
             }
 						
 			public void analyze(int srcPort, int dstnPort)
@@ -214,10 +231,10 @@ public class monitorRequests {
 			
 		};
 		
-		pcap.loop(5, jpacketHandler, "jNetPcap rocks!");	
-		sendRequest();
-		
-        pcap.close();  
+		pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, "jNetPcap rocks!");	
+					
+
+
     }
 	
 	public static void sendRequest()

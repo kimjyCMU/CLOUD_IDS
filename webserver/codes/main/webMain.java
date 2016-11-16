@@ -33,8 +33,8 @@ public class webMain
 		getUtilization util = new getUtilization(db.getThisDB(), collName);	
 		getRequests RQ = new getRequests(db.getThisDB(), collName);	
 		getUA ua = new getUA(db.getThisDB(), collName);
-		
+		getAllUAs allUAs = new getAllUAs(db.getThisDB(), collName);
 //		System.out.println(ua.getResult("10.1.128.27", "UA"));
-//		System.out.println(util.getResult("10.1.128.27", "UA"));
+//		System.out.println(util.getResult("10.1.128.27", "system"));
 	}
 }

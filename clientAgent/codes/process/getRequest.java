@@ -31,10 +31,11 @@ class SendRequest extends Thread {
 				
 		while(true)
 		{
-			packet.capture();
+			packet.capture();			
 			 
 			try{
 				Thread.sleep(Configuration.getRequestInterval());
+//				packet.setFlag();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

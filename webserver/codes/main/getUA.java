@@ -58,8 +58,6 @@ public class getUA
 			{
 				List<BasicDBObject> object = (ArrayList<BasicDBObject>)result.get(timeType.get(i));
 				
-				System.out.println("!! " + object.toString());
-				
 				if(object == null)
 					continue;
 				
@@ -84,57 +82,23 @@ public class getUA
 					}
 				}
 			}
+												
+			data = "[";
+				
+			Iterator<dataFormat> it = tsData.iterator();
 			
-			// no utilization in history like VMs
-			if(tsData == null)
+			while(it.hasNext())
 			{
-				data = "[";
-
-				ArrayList<String> lastUtil = getLastData(clickedIP);				
-				
-				for(int k=0; metrics.size() >k; k++)
-				{		
-					String value = "0.0";
+				dataForm = it.next();	
 					
-					if(lastUtil.get(k) != null && !lastUtil.get(k).equals("null"))
-							value = lastUtil.get(k);
+				data += "{\"IP\" : \"" + dataForm.getAddr() + "\",";
+				data += "\"TS\" : \"" + dataForm.getTS() + "\",";
+				data += "\"Value\" : \"" + dataForm.getValue() + "\"}";	
 					
-					data += "{\"Type\" : \"" + metrics.get(k) + "\",";
-					data += "\"TS\" : \"" + (int)((System.currentTimeMillis()/1000)) + "\",";
-					data += "\"Value\" : \"" + lastUtil.get(k) + "\"}";
-					
-					if(metrics.size() != k+1)
-						data += ",";								
-				}
-			}
-			
-			else
-			{		
-				ArrayList<String> lastUtil = getLastData(clickedIP);
-				
-/*				for(int k=0; metrics.size() >k; k++)
-				{
-					dataForm = new dataFormat((int)(System.currentTimeMillis()/1000), clickedIP, lastUtil.get(k), metrics.get(k));
-					tsData.add(dataForm);
-				}			
-*/									
-				data = "[";
-				
-				ArrayList<dataFormat> newTsUtil = sortTS(tsData);
-			
-				for(int i = 0; i < newTsUtil.size(); i++)
-				{
-					dataForm = newTsUtil.get(i);		
-					
-					data += "{\"IP\" : \"" + dataForm.getAddr() + "\",";
-//					data += "\"Type\" : \"" + dataForm.getType() + "\",";
-					data += "\"TS\" : \"" + dataForm.getTS() + "\",";
-					data += "\"Value\" : \"" + dataForm.getValue() + "\"}";	
-					
-					if(i+1 != newTsUtil.size())
+				if(it.hasNext())
 						data += ",";					
-				}			
-			}
+			}			
+
 			if(cursor.hasNext())
 				data += ",";
 		}
@@ -144,109 +108,11 @@ public class getUA
 		return data;
 	}
 	
-	public static ArrayList<dataFormat> sortTS(HashSet<dataFormat> old)
-	{
-		ArrayList<dataFormat> newUtil = new ArrayList<dataFormat>();
-		ArrayList<dataFormat> oldUtil = new ArrayList<dataFormat>(old);
-		
-		// make a list of TS
-		HashSet<Integer> tsList = new HashSet<Integer>();
-		dataFormat dataForm;
-		
-		for(int i = 0; oldUtil.size() > i; i++)
-		{
-			dataForm = oldUtil.get(i);
-			tsList.add(dataForm.getTS());
-		}
-		
-		// sort
-		List sortedList = new ArrayList(tsList);
-		Collections.sort(sortedList);
-		
-		// get newUtil
-		for(int i = 0; sortedList.size() > i; i++)
-		{
-			int minTS = (int)sortedList.get(i);
-			
-			for(int j = 0; oldUtil.size() > j; j++)
-			{
-				dataForm = oldUtil.get(j);
-				int myTS = dataForm.getTS();
-				
-				if(myTS == minTS)
-				{
-					newUtil.add(dataForm);
-					oldUtil.remove(j);
-					j--;
-				}
-			}
-		}
-				
-		return newUtil;
-	}
-	
-	public static ArrayList<String> getLastData(String ip)
-	{
-		ArrayList<String> lastUtilValues = new ArrayList<String>();
-		ArrayList<String> monitorGroup = new ArrayList<String>();
-		monitorGroup.add(ip);
-		
-		BasicDBObject query = new BasicDBObject();
-		query.put("IP","$IP");
-		
-		for(int i=0; metrics.size() > i; i++)
-		{
-			String type = metrics.get(i);
-			query.put(type,"$L"+type);
-		}
-		
-		BasicDBObject project = new BasicDBObject("$project",query);	
-
-		BasicDBObject match = new BasicDBObject("$match",new BasicDBObject("IP", new BasicDBObject("$in", monitorGroup)));
-				
-		List<BasicDBObject> pipeline = new ArrayList<BasicDBObject>();
-
-		pipeline.add(project);	
-		pipeline.add(match);				
-			
-		AggregationOptions aggregationOptions = AggregationOptions.builder()
-			.batchSize(100)
-			.outputMode(AggregationOptions.OutputMode.CURSOR)
-			.build();
-		
-		Cursor cursor = collection.aggregate(pipeline,aggregationOptions);
-		
-		while(cursor.hasNext())
-		{
-
-			BasicDBObject result = (BasicDBObject) cursor.next();	
-			
-			for(int i=0; metrics.size() > i; i++)
-			{
-				String type = metrics.get(i);
-				String value = (String)result.get(type);	
-				lastUtilValues.add(value);			
-			}
-		}
-		
-		return lastUtilValues;
-	}
-	
 	public static Cursor getCursor(String ip) throws MongoException
 	{		
 		ArrayList<String> monitorGroup = new ArrayList<String>();
 		
-//	Find all IPs		
-		BasicDBObject query1 = new BasicDBObject();
-		BasicDBObject field = new BasicDBObject();
-		field.put("IP", 1);
-		DBCursor cursor1 = collection.find(query1,field);
-		
-		while (cursor1.hasNext()) {
-			BasicDBObject obj = (BasicDBObject) cursor1.next();
-			monitorGroup.add(obj.getString("IP"));
-		}
-		System.out.println("## " + monitorGroup);
+		monitorGroup.add(ip);
 		
 // db.data.aggregate({$project:{"IP":"$IP","min":"$MIN"}},{$match:{'IP':{$in:["10.1.128.27","10.1.128.24","10.1.128.122"]}}})
 		BasicDBObject query = new BasicDBObject();		
