@@ -22,6 +22,9 @@ public class getSystem extends Thread{
 
 class SendSystem extends Thread {
 	private SystemInfo system_info;
+	double oldCPU = 0;
+	double oldRAM = 0;
+	double oldDisk = 0;
     
 	public void run() {
 		String ip = Main.getSystemIP();
@@ -38,8 +41,15 @@ class SendSystem extends Thread {
 			System.out.println("IP: " + ip
 					+ ", CPU: " + this.system_info.cpu + ", RAM: "
 					+ this.system_info.mem + ", Disk: " + this.system_info.disk);
-				
-			 Sendtoserver(Configuration.SYSTEM);
+			
+			if(oldCPU != this.system_info.cpu || oldRAM != this.system_info.mem || oldDisk != this.system_info.disk)
+			{
+				System.out.println("\n\n <================ Update System ==============>");
+				Sendtoserver(Configuration.SYSTEM);
+				oldCPU = this.system_info.cpu;
+				oldRAM = this.system_info.mem;
+				oldDisk = this.system_info.disk;
+			}			 
 			 
 			 boolean flag = false;
 			 

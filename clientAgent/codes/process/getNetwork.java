@@ -22,6 +22,8 @@ public class getNetwork extends Thread{
 
 class SendNetwork extends Thread {
 	private NetworkInfo network_info;
+	double oldIn = 0;
+	double oldOut = 0;
     
 	public void run() {
 		String ip = Main.getSystemIP();
@@ -39,13 +41,18 @@ class SendNetwork extends Thread {
 					+ ", inbound: " + this.network_info.netin + ", outbound: "
 					+ this.network_info.netout);
 					
-			 Sendtoserver(Configuration.NETWORK);
-			 
+			if(oldIn != this.network_info.netin || oldOut != this.network_info.netout)
+			{
+				System.out.println("\n\n <================ Update Network ==============>");
+				Sendtoserver(Configuration.NETWORK);
+				oldIn = this.network_info.netin;
+				oldOut = this.network_info.netout;
+			}
+								 
 			 // Check Unit action
 			 boolean flag = false;
 			 
-			 if(this.network_info.netin > Configuration.getThresholdInbound() ||
-				this.network_info.netout > Configuration.getThresholdOutbound())
+			 if(this.network_info.netin > Configuration.getThresholdInbound() || this.network_info.netout > Configuration.getThresholdOutbound())
 					flag = true;
 			
 			unitAction ua = new unitAction();

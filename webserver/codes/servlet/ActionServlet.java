@@ -33,6 +33,8 @@ public class ActionServlet extends HttpServlet {
   response.setHeader("Pragma","No-cache");
   response.setDateHeader("Expires",-1);
   response.setHeader("Cache-Control","no-Cache"); 
+  response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+  response.setDateHeader("Expires", 0);
   
    // Response utilization history of a clicked machine 
   if(!request.getParameter("system").toString().equals("")){

@@ -27,6 +27,9 @@ public class monitorRequests {
 	
 	static int servicePort;
 	
+	static int oldReq = 0;
+	static int oldRes = 0;
+	
 	static HashMap<String, numReqRes> cntRQ = new HashMap<String, numReqRes>();
 	
 	public monitorRequests(String ip)
@@ -74,7 +77,7 @@ public class monitorRequests {
         int flags = Pcap.MODE_PROMISCUOUS; // capture all packets  
         int timeout = Configuration.getRequestInterval();           // 10 seconds in millis  
         final Pcap pcap = Pcap.openLive(nic.getName(), snaplen, flags, timeout, errbuf);  
-		final long interval = System.currentTimeMillis() + CAPTURE_INTERVAL;
+		
   
 		cntRQ.clear();
 		
@@ -108,6 +111,7 @@ public class monitorRequests {
 			
 			StringBuilder str = new StringBuilder();
 			
+			final long interval = System.currentTimeMillis() + CAPTURE_INTERVAL;
             public void nextPacket(PcapPacket packet, String user) 
 			{
 				if (System.currentTimeMillis() > interval) 
@@ -265,19 +269,26 @@ public class monitorRequests {
 			request.SetIsXml(infoType);
 			request.SetRequestInfo(req_info);
 			
-			Send2Server.Send(request);	
-
+			if(oldReq != req || oldRes != res)
+			{
+				System.out.println("\n\n <=============== Update ==============>");
+				Send2Server.Send(request);	
+				oldReq = req;
+				oldRes = res;
+			}
+			
 			 // Check Unit action
 			 boolean flag = false;
 			 
-			 if(req > Configuration.getThresholdRequestPair() ||
-				res > Configuration.getThresholdRequestPair())
+			 if((req > Configuration.getThresholdRequestPair()) || (res > Configuration.getThresholdRequestPair()))
 				flag = true;
 			
 			unitAction ua = new unitAction();
 			ua.setUnitAction(Configuration.REQUESTPAIR, flag);		
 			
-			if(ratio > Configuration.getThresholdRequestRatio())
+			flag = false;
+			
+			if(ratio != 0 && ratio < Configuration.getThresholdRequestRatio())
 					flag = true;
 			
 			ua.setUnitAction(Configuration.REQUESTRATIO, flag);		

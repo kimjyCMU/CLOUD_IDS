@@ -15,6 +15,7 @@ import java.util.Map;
 class unitAction extends Thread {
 	private boolean flag;
 	private static String UA = "normal";
+	private static String oldUA = null;
 	Thread t;
 	
 	public void setUnitAction(int type, boolean flag)
@@ -35,9 +36,15 @@ class unitAction extends Thread {
 			if(type == Configuration.REQUESTRATIO)
 				UA = Configuration.getRequestRatioUA();						
 		}
+		
+		if(oldUA == null  || !oldUA.equals(UA))
+		{
+			System.out.println("\n\n <------------------ Update ----------------->");
+			t = new sendUA (UA);
+			t.start();
 			
-		t = new sendUA (UA);
-		t.start(); 
+			oldUA = UA;
+		}
 	}
 }
 
