@@ -2,7 +2,9 @@
 #!/usr/bin/expect
 
 user="lama"
-password="llama"
+userR="root"
+password="theOne!penguinsFTW"
+#password="llama"
 
 ###### Copy authorized_keys to remote machines for auto SSH connection ##### 
 DIR="/home/$user/cloudSecurity/clientAgent"
@@ -13,7 +15,7 @@ IPs=$(cat $IPlist)
 for i in $IPs  
 do   
 expect -c "  
-spawn ssh-copy-id -i /home/$user/.ssh/id_rsa.pub $user@$i  
+spawn ssh-copy-id -i /home/$user/.ssh/id_rsa.pub $userR@$i  
    expect {  
        \"*yes/no*\" {send \"yes\r\"; exp_continue}  
        \"*password*\" {send \"$password\r\"; exp_continue}  

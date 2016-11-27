@@ -8,6 +8,7 @@ public class Configuration {
 
     private static String serverIP = null;
     private static int socketPort;
+	private static String virtualBrdgIP = null;
 	
 	private static String NIC = null;
 	private static int servicePort;
@@ -61,7 +62,10 @@ public class Configuration {
                     serverIP = value;
 					
 				else if (parameter.equals("socket_port"))
-                    socketPort = Integer.parseInt(value);				
+                    socketPort = Integer.parseInt(value);	
+
+				else if(parameter.equals("virtual bridge IP address"))
+					virtualBrdgIP = value;					
 
 				//###### Set info about the NIC to be monitored
 		        else if (parameter.equals("NIC"))
@@ -166,6 +170,10 @@ public class Configuration {
 	public static int getSocketPort() {
         return socketPort;
     }
+	
+	public static String getVirtualBrdgIP(){
+		return virtualBrdgIP;
+	}
 	
 	//################################
 	public static String getNIC() {
@@ -273,6 +281,7 @@ public class Configuration {
 	{
 		System.out.println(getRemoteserver());
 		System.out.println(getSocketPort());
+		System.out.println(getVirtualBrdgIP());
 		System.out.println(getNIC());
 		System.out.println(getServicePort());
 		System.out.println(getSystemInterval());

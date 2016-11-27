@@ -1,9 +1,13 @@
 #!/bin/bash  
 
 user="lama"
-password="llama"
+#password="llama"
+password="theOne!penguinsFTW"
+userR="root"
 
-DIR="/home/$user/cloudSecurity"
+#DIR="/home/$user/cloudSecurity"
+DIR="/home/cloudSecurity/clientAgent"
+
 FILE="cloudSecurity.jar"
 ###### run the program #####
 

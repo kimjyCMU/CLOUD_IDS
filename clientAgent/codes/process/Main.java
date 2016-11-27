@@ -66,6 +66,7 @@ public class Main {
     public static String getIp() throws UnknownHostException {
         try {
             InetAddress candidateAddress = null;
+			String virtualBrdgIP = Configuration.getVirtualBrdgIP();
 
             // Iterate all NICs (network interface cards)...
             for (Enumeration<NetworkInterface> ifaces = NetworkInterface
@@ -84,6 +85,8 @@ public class Main {
                             // Found non-loopback site-local address. Return it
                             // immediately...
                             String resultIP = inetAddr.toString().split("/")[1];
+							if(resultIP.equals(virtualBrdgIP))
+								continue;
 
                             return resultIP;
                         } 
