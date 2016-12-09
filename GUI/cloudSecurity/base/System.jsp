@@ -95,14 +95,18 @@ var indexIP=<%=ip%>;
 console.log(indexIP);
 var data = ajaxdata(indexIP);
 
-data = data.sort(function(a,b) {return (a.TS > b.TS) ? 1 : ((b.TS > a.TS) ? -1 : 0);} ); 
+var minTS = data.slice(0).sort(function(a, b) { return a.TS - b.TS})[0].TS;
+console.log(minTS); 
 
 var numType = 0;
-data.forEach(function(d){
-	d.TS = new Date(+d.TS*1000);	
+data.forEach(function(d, i){
+	d.TS = d.TS - minTS; 
+
 	numType = d.Type.length;
 });	
-//console.log(data);
+
+data = data.sort(function(a,b) {return (a.TS > b.TS) ? 1 : ((b.TS > a.TS) ? -1 : 0);} ); 
+console.log(data);
 
 var metrics = ["CPU", "RAM", "Disk"];
 
@@ -114,7 +118,8 @@ console.log(JSON.stringify(dataGroup));
 
 var currentTime = new Date();
 
-var	xScale = d3.time.scale().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), d3.max(data, function(d) {return d.TS;})]);
+//var	xScale = d3.time.scale().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), d3.max(data, function(d) {return d.TS;})]);
+var	xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), d3.max(data, function(d) {return d.TS;})]);
 var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 100]);
 
 /*

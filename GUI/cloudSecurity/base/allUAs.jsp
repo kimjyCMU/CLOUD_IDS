@@ -95,21 +95,27 @@ var indexIP=<%=ip%>;
 console.log(indexIP);
 
 var data = ajaxdata(indexIP);
-data = data.sort(function(a,b) {return (a.TS > b.TS) ? 1 : ((b.TS > a.TS) ? -1 : 0);} ); 
+
+var minTS = data.slice(0).sort(function(a, b) { return a.TS - b.TS})[0].TS;
+console.log(minTS); 
 
 var color = d3.scale.category10();
-console.log(data);
 
-var valUA = ["normal", "flooding", "APIabuse", "spoofing", "bruteforce","ProtocolManipulation"];
+
+var valUA = ["normal", "flooding", "APIabuse", "spoofing", "bruteforce","ProtocolManipulation","analysis","injection"];
+console.log(valUA);
+
 var IPs = [];
 
 data.forEach(function(d){
-	d.TS = new Date(+d.TS*1000);	
+	d.TS = d.TS - minTS; 
 	
 	if(IPs.indexOf(d.IP) < 0)
 		IPs.push(d.IP);
 });	
-console.log(valUA);
+
+data = data.sort(function(a,b) {return (a.TS > b.TS) ? 1 : ((b.TS > a.TS) ? -1 : 0);} ); 
+console.log(data);
 
 var dataGroup = d3.nest()
       .key(function(d) {return d.IP;})
@@ -119,7 +125,7 @@ console.log(JSON.stringify(dataGroup));
 
 var currentTime = new Date();
 
-var	xScale = d3.time.scale().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), d3.max(data, function(d) {return d.TS;})]);
+var	xScale = d3.scale.ordinal().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), d3.max(data, function(d) {return d.TS;})]);
 var yScale = d3.scale.ordinal().rangePoints([HEIGHT - MARGINS.top, MARGINS.bottom]).domain(valUA);
 
 var xAxis = d3.svg.axis().scale(xScale).tickSize(-HEIGHT).orient("bottom").tickSubdivide(true).tickPadding(10);

@@ -33,11 +33,13 @@ public class Configuration {
 	private static int thresholdOutbound;	
 	private static int thresholdRequestPair;
 	private static double thresholdRequestRatio;
+	private static int thresholdNumNeighbor;
 	
 	private static String systemUA = null;
 	private static String networkUA = null;
 	private static String requestPairUA = null;
 	private static String requestRatioUA = null;
+	private static String numNeighborUA = null;
 	
     public static final int SYSTEM = 1;
 	public static final int NETWORK = 2;
@@ -45,6 +47,7 @@ public class Configuration {
 	public static final int REQUESTPAIR = 4;
 	public static final int REQUESTRATIO = 5;
 	public static final int UNITACTION = 6;
+	public static final int NUMNEIGHBOR = 7;
 
     public static void setConfiguration() 
 	{
@@ -139,7 +142,10 @@ public class Configuration {
                     thresholdRequestPair = Integer.parseInt(value);
 
 				else if (parameter.equals("Request_ratio_threshold"))
-                    thresholdRequestRatio = Double.parseDouble(value);		
+                    thresholdRequestRatio = Double.parseDouble(value);	
+
+				else if (parameter.equals("Num_neighbor_threshold"))
+                    thresholdNumNeighbor = Integer.parseInt(value);					
 
 				else if (parameter.equals("system_UA"))
                     systemUA = value;		
@@ -151,7 +157,10 @@ public class Configuration {
                     requestPairUA = value;		
 
 				else if (parameter.equals("request_ratio_UA"))
-                    requestRatioUA = value;					
+                    requestRatioUA = value;	
+
+				else if (parameter.equals("num_neighbor_UA"))
+                    numNeighborUA = value;					
 				
                 sLine = null;
             }
@@ -259,6 +268,10 @@ public class Configuration {
         return thresholdRequestRatio;
     }
 	
+	public static int getThresholdNumNeighbor() {
+        return thresholdNumNeighbor;
+    }
+	
 	// Unit actions
 	public static String getSystemUA() {
         return systemUA;
@@ -275,6 +288,10 @@ public class Configuration {
 	public static String getRequestRatioUA() {
         return requestRatioUA;
     }
+	
+	public static String getNumNeighborUA() {
+        return numNeighborUA;
+    }	
 	
 	//######################## Test #####
 	public static void printAll()
@@ -301,10 +318,12 @@ public class Configuration {
 		System.out.println(getThresholdInbound());
 		System.out.println(getThresholdOutbound());
 		System.out.println(getThresholdRequestPair());			
-		System.out.println(getThresholdRequestRatio());		
+		System.out.println(getThresholdRequestRatio());	
+		System.out.println(getThresholdNumNeighbor());		
 		System.out.println(getSystemUA());
 		System.out.println(getNetworkUA());
 		System.out.println(getRequestPairUA());			
-		System.out.println(getRequestRatioUA());			
+		System.out.println(getRequestRatioUA());	
+		System.out.println(getNumNeighborUA());			
 	}
 }

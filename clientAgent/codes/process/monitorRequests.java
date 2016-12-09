@@ -16,10 +16,11 @@ import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
 import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.network.Ip4;
+import org.jnetpcap.protocol.network.Icmp;
 
 
 public class monitorRequests {  
-	static String ip = null;
+	static String myip = null;
 	static PcapIf nic = null;
 	static StringBuilder errbuf;
 	static boolean pcapFlag = true;
@@ -30,11 +31,13 @@ public class monitorRequests {
 	static int oldReq = 0;
 	static int oldRes = 0;
 	
+	static HashSet<String> allIPs = new HashSet<String>();
+	
 	static HashMap<String, numReqRes> cntRQ = new HashMap<String, numReqRes>();
 	
-	public monitorRequests(String ip)
+	public monitorRequests(String myip)
 	{
-		this.ip = ip;
+		this.myip = myip;
 		servicePort = Configuration.getServicePort();
 		
 		List<PcapIf> alldevs = new ArrayList<PcapIf>(); // Will be filled with NICs  
@@ -57,7 +60,7 @@ public class monitorRequests {
 					
 			System.out.printf("Find #%d: %s [%s]\n", i++, device.getName(), description);
 			
-			if(device.toString().contains(ip))
+			if(device.toString().contains(myip))
 			{
 				nic = device;
 				System.out.println("We are going to choose < " + nic.getName() + " > ");
@@ -77,8 +80,7 @@ public class monitorRequests {
         int flags = Pcap.MODE_PROMISCUOUS; // capture all packets  
         int timeout = Configuration.getRequestInterval();           // 10 seconds in millis  
         final Pcap pcap = Pcap.openLive(nic.getName(), snaplen, flags, timeout, errbuf);  
-		
-  
+	  
 		cntRQ.clear();
 		
         if (pcap == null)  
@@ -89,11 +91,12 @@ public class monitorRequests {
         }
 
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() 
-		{  
+		{  		
             Tcp tcp = new Tcp();
             Udp udp = new Udp();
             Ip4 ip = new Ip4(); 
 			Http http = new Http();
+			Icmp icmp = new Icmp();  
 
             byte[] sIP = new byte[4];
             byte[] dIP = new byte[4];
@@ -109,11 +112,12 @@ public class monitorRequests {
 			byte[] payloadContent;
 			String content = "## No payload";
 			
-			StringBuilder str = new StringBuilder();
+			StringBuilder str = new StringBuilder();			
 			
 			final long interval = System.currentTimeMillis() + CAPTURE_INTERVAL;
             public void nextPacket(PcapPacket packet, String user) 
 			{
+				boolean monitorServer = false;
 				if (System.currentTimeMillis() > interval) 
 				{  
 					sendRequest();
@@ -121,7 +125,7 @@ public class monitorRequests {
                 }
 				
 				else
-				{
+				{	
 					if (packet.hasHeader(ip))
 					{
 						sIP = packet.getHeader(ip).source();
@@ -129,15 +133,19 @@ public class monitorRequests {
 						dIP = packet.getHeader(ip).destination();
 						dstnIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
 					}
-					
-					if (packet.hasHeader(tcp)) 
+					if(srcIP.equals(Configuration.getRemoteserver()) || dstnIP.equals(Configuration.getRemoteserver()))
+						monitorServer = true;
+//					System.out.println("\n ### : " + ip.typeEnum().name() + " : " + srcIP + "->" + dstnIP);
+ 
+					if (!monitorServer && packet.hasHeader(tcp)) 
 					{
 						srcPort = tcp.source();
 						dstnPort = tcp.destination();
 						
 						// Should be analyzed
-						if((servicePort == srcPort) || (servicePort == dstnPort))
-						{						
+						if(!srcIP.equals(dstnIP) && ((servicePort == srcPort) || (servicePort == dstnPort)))
+						{	
+							System.out.println("\n >> PACKET : " + srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort);						
 							// HTTP packet
 							if(servicePort == 80)
 							{						
@@ -156,7 +164,6 @@ public class monitorRequests {
 							else
 								analyze (srcPort, dstnPort);
 							
-							System.out.println("\n >> PACKET : " + srcIP + "->" + dstnIP + " " + srcPort + "->" + dstnPort + " ");
 	//						System.out.println(content);
 						}					
 					}
@@ -175,9 +182,16 @@ public class monitorRequests {
 					while(itRQ.hasNext())
 					{	
 						String key = itRQ.next();
+							
+						if(srcIP.equals(myip))
+						{
+							String tmp = srcIP;
+							srcIP = dstnIP;
+							dstnIP = tmp;
+						}
 						
 						if(key.equals(srcIP))
-						{						
+						{					
 							numReqRes RQ = cntRQ.get(key);
 							
 							int value = RQ.getReq();
@@ -208,8 +222,15 @@ public class monitorRequests {
 					{	
 						String key = itRQ.next();
 						
+						if(dstnIP.equals(myip))
+						{
+							String tmp = dstnIP;
+							dstnIP = srcIP;
+							srcIP = tmp;
+						}
+						
 						if(key.equals(dstnIP))
-						{	
+						{
 							numReqRes RQ = cntRQ.get(key);
 							
 							int value = RQ.getRes();
@@ -229,16 +250,11 @@ public class monitorRequests {
 						numReqRes RQ = new numReqRes (0, 1);
 						cntRQ.put(dstnIP, RQ);
 					}
-				}
-				
-			}
-			
+				}				
+			}			
 		};
 		
 		pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, "jNetPcap rocks!");	
-					
-
-
     }
 	
 	public static void sendRequest()
@@ -249,11 +265,28 @@ public class monitorRequests {
 		double ratio = 0;
 		
 		Iterator<String> itRQ = cntRQ.keySet().iterator();
-			
-		System.out.println("############## MyIP <-> neighIP : REQ , RES, RES/REQ ################");			
+						
 		while(itRQ.hasNext())
 		{
 			String key = itRQ.next();
+			
+			if(key.equals(myip))
+				continue;
+			
+			allIPs.add(key);
+
+			// Check Unit action
+			 boolean flag = false;
+			 
+			 if(allIPs.size() >= Configuration.getThresholdNumNeighbor())
+				flag = true;
+			
+			unitAction ua = new unitAction();
+			ua.setUnitAction(Configuration.NUMNEIGHBOR, flag);		
+			
+			flag = false;
+			//#############################			
+			
 			numReqRes RQ = cntRQ.get(key);
 			
 			int req = RQ.getReq();
@@ -262,10 +295,10 @@ public class monitorRequests {
 			if(req != 0)
 				ratio = decimalFormat((double)res / req);
 			
-			System.out.println(ip + "<->" + key + " : " + req + " , " + res + " , " + ratio);
+			System.out.println(myip + "<->" + key + " : " + req + " , " + res + " , " + ratio);
 			
 
-			req_info = new RequestInfo(ip, key, servicePort, req, res, ratio);
+			req_info = new RequestInfo(myip, key, servicePort, req, res, ratio);
 			request.SetIsXml(infoType);
 			request.SetRequestInfo(req_info);
 			
@@ -277,13 +310,10 @@ public class monitorRequests {
 				oldRes = res;
 			}
 			
-			 // Check Unit action
-			 boolean flag = false;
-			 
+			 // Check Unit action			 
 			 if((req > Configuration.getThresholdRequestPair()) || (res > Configuration.getThresholdRequestPair()))
 				flag = true;
 			
-			unitAction ua = new unitAction();
 			ua.setUnitAction(Configuration.REQUESTPAIR, flag);		
 			
 			flag = false;

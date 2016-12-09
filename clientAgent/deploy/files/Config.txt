@@ -1,11 +1,11 @@
-remote server=10.1.128.87
+remote server=10.1.128.8
 socket_port=30000
 virtual bridge IP address=192.168.122.1
-NIC=br-ext
+NIC=eth0
 service_port=22
 system_interval=3000
 network_interval=3000
-request_interval=3000
+request_interval=300
 UA_interval=3000
 CPU_avg=5
 RAM_avg=45

@@ -3,4 +3,4 @@ socket port=30000
 DB IP address=127.0.0.1
 DB port=27017
 DB name=cloudSecurity
-collection=worm
+collection=unknown

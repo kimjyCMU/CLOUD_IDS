@@ -34,7 +34,10 @@ class unitAction extends Thread {
 				UA = Configuration.getRequestPairUA();
 			
 			if(type == Configuration.REQUESTRATIO)
-				UA = Configuration.getRequestRatioUA();						
+				UA = Configuration.getRequestRatioUA();		
+
+			if(type == Configuration.NUMNEIGHBOR)
+				UA = Configuration.getNumNeighborUA();					
 		}
 		
 		if(oldUA == null  || !oldUA.equals(UA))

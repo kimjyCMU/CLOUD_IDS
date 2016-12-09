@@ -104,10 +104,11 @@ data = data.sort(function(a,b) {return (a.TS > b.TS) ? 1 : ((b.TS > a.TS) ? -1 :
 var neighborAddr = [];
 var neighNum = 0;
 
-var minTS = d3.min(data, function(d) {return d.TS;});
+var minTS = data.slice(0).sort(function(a, b) { return a.TS - b.TS})[0].TS;
+console.log(minTS); 
+
 data.forEach(function(d){
-//	d.TS = d.TS*1000 - minTS*1000;
-	d.TS = new Date(+d.TS*1000);	
+	d.TS = d.TS - minTS; 
 	
 	if(neighborAddr.indexOf(d.Addr) < 0)
 		neighborAddr.push(d.Addr);
@@ -174,7 +175,7 @@ for(var k=0; k < neighNum; k++)
 
 var currentTime = new Date();
 
-var	xScale = d3.time.scale().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), d3.max(data, function(d) {return d.TS;})]);
+var	xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {return d.TS;}), d3.max(data, function(d) {return d.TS;})]);
 var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, d3.max(metrics, function(d) {return d.Value * 1.1 ;})]);
 
 var xAxis = d3.svg.axis().scale(xScale).tickSize(-HEIGHT).orient("bottom").tickSubdivide(true).tickPadding(10);
