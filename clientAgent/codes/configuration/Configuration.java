@@ -34,12 +34,14 @@ public class Configuration {
 	private static int thresholdRequestPair;
 	private static double thresholdRequestRatio;
 	private static int thresholdNumNeighbor;
+	private static int thresholdInOutRatio;
 	
 	private static String systemUA = null;
 	private static String networkUA = null;
 	private static String requestPairUA = null;
 	private static String requestRatioUA = null;
 	private static String numNeighborUA = null;
+	private static String spoofedNetworkUA = null;
 	
     public static final int SYSTEM = 1;
 	public static final int NETWORK = 2;
@@ -48,6 +50,7 @@ public class Configuration {
 	public static final int REQUESTRATIO = 5;
 	public static final int UNITACTION = 6;
 	public static final int NUMNEIGHBOR = 7;
+	public static final int SPOOFEDNETWORK = 8;
 
     public static void setConfiguration() 
 	{
@@ -144,6 +147,9 @@ public class Configuration {
 				else if (parameter.equals("Request_ratio_threshold"))
                     thresholdRequestRatio = Double.parseDouble(value);	
 
+				else if (parameter.equals("In_Out_threshold"))
+                    thresholdInOutRatio = Integer.parseInt(value);		
+
 				else if (parameter.equals("Num_neighbor_threshold"))
                     thresholdNumNeighbor = Integer.parseInt(value);					
 
@@ -160,7 +166,11 @@ public class Configuration {
                     requestRatioUA = value;	
 
 				else if (parameter.equals("num_neighbor_UA"))
-                    numNeighborUA = value;					
+                    numNeighborUA = value;		
+
+				else if (parameter.equals("spoof_UA"))
+                    spoofedNetworkUA = value;	
+				
 				
                 sLine = null;
             }
@@ -272,6 +282,10 @@ public class Configuration {
         return thresholdNumNeighbor;
     }
 	
+	public static int getThresholdInOutRatio() {
+        return thresholdInOutRatio;
+    }
+	
 	// Unit actions
 	public static String getSystemUA() {
         return systemUA;
@@ -292,6 +306,11 @@ public class Configuration {
 	public static String getNumNeighborUA() {
         return numNeighborUA;
     }	
+	
+	public static String getSpoofedNetworUA() {
+        return spoofedNetworkUA;
+    }		
+	
 	
 	//######################## Test #####
 	public static void printAll()
@@ -320,6 +339,7 @@ public class Configuration {
 		System.out.println(getThresholdRequestPair());			
 		System.out.println(getThresholdRequestRatio());	
 		System.out.println(getThresholdNumNeighbor());		
+		System.out.println(getThresholdInOutRatio());	
 		System.out.println(getSystemUA());
 		System.out.println(getNetworkUA());
 		System.out.println(getRequestPairUA());			

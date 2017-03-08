@@ -52,11 +52,22 @@ class SendNetwork extends Thread {
 			 // Check Unit action
 			 boolean flag = false;
 			 
-			 if(this.network_info.netin > Configuration.getThresholdInbound() || this.network_info.netout > Configuration.getThresholdOutbound())
+			if(this.network_info.netin > Configuration.getThresholdInbound() || this.network_info.netout > Configuration.getThresholdOutbound())
+					flag = true;
+				
+			if((this.network_info.netin > Configuration.getThresholdInbound() * 0.5) && (this.network_info.netout * Configuration.getThresholdInOutRatio() < this.network_info.netin)
 					flag = true;
 			
 			unitAction ua = new unitAction();
 			ua.setUnitAction(Configuration.NETWORK, flag);
+			
+			flag = false;
+			 
+			if(this.network_info.netout > Configuration.getThresholdOutbound() * 0.5 && this.network_info.netin * Configuration.getThresholdInOutRatio() < this.network_info.netout)
+					flag = true;
+			
+			ua = new unitAction();
+			ua.setUnitAction(Configuration.SPOOFEDNETWORK, flag);
 			 
 			try{
 				Thread.sleep(Configuration.getNetworkInterval());
